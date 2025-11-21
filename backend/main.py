@@ -30,72 +30,75 @@ DEVICE = "cuda" if shutil.which("nvidia-smi") else "cpu"
 MODEL_CACHE: dict[str, WhisperModel] = {}
 OUTPUT_DIR = Path(__file__).resolve().parent / "exports"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+FONTS_DIR = Path(__file__).resolve().parent / "fonts"
+FONTS_DIR.mkdir(parents=True, exist_ok=True)
+
 PRESET_STYLE_MAP = {
     "fire-storm": {
-        "font": "Archivo Black",
-        "primary_color": "&H00006DFF", # Orange
+        "font": "Brown Beige",
+        "primary_color": "&H00006DFF",
         "outline_color": "&H00000000",
         "font_size": 64,
         "id": "fire-storm"
     },
     "cyber-glitch": {
-        "font": "Roboto Mono",
-        "primary_color": "&H00FFFFFF", # White
-        "outline_color": "&H00FF0000", # Blueish
+        "font": "OverHeat Regular",
+        "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00FF0000",
         "font_size": 60,
         "id": "cyber-glitch"
     },
     "neon-pulse": {
-        "font": "Inter",
-        "primary_color": "&H00FFFC7C", # Cyan
-        "outline_color": "&H00FF00FF", # Magenta
+        "font": "Thoge",
+        "primary_color": "&H00FFFC7C",
+        "outline_color": "&H00FF00FF",
         "font_size": 62,
         "id": "neon-pulse"
     },
     "kinetic-bounce": {
-        "font": "Sora",
+        "font": "Press Start 2P",
         "primary_color": "&H00FFFFFF",
         "outline_color": "&H00000000",
         "font_size": 64,
         "id": "kinetic-bounce"
     },
     "cinematic-blur": {
-        "font": "Montserrat",
+        "font": "BlackCaps",
         "primary_color": "&H00E0E0E0",
         "outline_color": "&H00000000",
         "font_size": 58,
         "id": "cinematic-blur"
     },
     "thunder-strike": {
-        "font": "Impact",
-        "primary_color": "&H0000FFFF", # Yellow
+        "font": "Komika Axis",
+        "primary_color": "&H0000FFFF",
         "outline_color": "&H00000000",
         "font_size": 66,
         "id": "thunder-strike"
     },
     "typewriter-pro": {
-        "font": "Courier New",
+        "font": "OverHeat Regular",
         "primary_color": "&H00FFFFFF",
         "outline_color": "&H00000000",
         "font_size": 56,
         "id": "typewriter-pro"
     },
     "rainbow-wave": {
-        "font": "Fredoka One",
+        "font": "Brown Beige",
         "primary_color": "&H00FFFFFF",
         "outline_color": "&H00000000",
         "font_size": 64,
         "id": "rainbow-wave"
     },
     "earthquake-shake": {
-        "font": "Bebas Neue",
-        "primary_color": "&H000000FF", # Red
+        "font": "Thoge",
+        "primary_color": "&H000000FF",
         "outline_color": "&H00FFFFFF",
         "font_size": 70,
         "id": "earthquake-shake"
     },
     "word-pop": {
-        "font": "Poppins",
+        "font": "Komika Axis",
         "primary_color": "&H00FFFFFF",
         "outline_color": "&H00333333",
         "font_size": 60,
@@ -116,7 +119,7 @@ PRESET_STYLE_MAP = {
         "id": "horror-creepy"
     },
     "luxury-gold": {
-        "font": "Montserrat",
+        "font": "Brown Beige",
         "primary_color": "&H0000D7FF",
         "outline_color": "&H00000000",
         "font_size": 60,
@@ -130,11 +133,144 @@ PRESET_STYLE_MAP = {
         "id": "comic-book"
     },
     "news-ticker": {
-        "font": "Roboto Mono",
+        "font": "Thoge",
         "primary_color": "&H00FFFFFF",
         "outline_color": "&H00000000",
         "font_size": 48,
         "id": "news-ticker"
+    },
+    "pulse": {
+        "font": "Brown Beige",
+        "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00FF00FF",
+        "font_size": 62,
+        "id": "pulse"
+    },
+    "bubble-floral": {
+        "font": "Thoge",
+        "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00FFBD00",
+        "font_size": 58,
+        "id": "bubble-floral"
+    },
+    "falling-heart": {
+        "font": "OverHeat Regular",
+        "primary_color": "&H00000000",
+        "outline_color": "&H00A5907E",
+        "font_size": 64,
+        "id": "falling-heart"
+    },
+    "colorful": {
+        "font": "Komika Axis",
+        "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00000000",
+        "font_size": 60,
+        "id": "colorful"
+    },
+    "ghost-star": {
+        "font": "BlackCaps",
+        "primary_color": "&H00FFFFFF",
+        "outline_color": "&H0000FFFF",
+        "font_size": 56,
+        "id": "ghost-star"
+    },
+    "tiktok-group": {
+        "font": "Brown Beige",
+        "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00000000",
+        "font_size": 58,
+        "id": "tiktok-group"
+    },
+    "matrix-rain": {
+        "font": "Monigue",
+        "primary_color": "&H0000FF00",
+        "outline_color": "&H00000000",
+        "font_size": 54,
+        "id": "matrix-rain"
+    },
+    "electric-shock": {
+        "font": "Chunko Bold",
+        "primary_color": "&H0000FFFF",
+        "outline_color": "&H00000000",
+        "font_size": 66,
+        "id": "electric-shock"
+    },
+    "smoke-trail": {
+        "font": "Brume",
+        "primary_color": "&H00CCCCCC",
+        "outline_color": "&H00666666",
+        "font_size": 58,
+        "id": "smoke-trail"
+    },
+    "pixel-glitch": {
+        "font": "Tallica",
+        "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00FF0000",
+        "font_size": 60,
+        "id": "pixel-glitch"
+    },
+    "neon-sign": {
+        "font": "Oslla",
+        "primary_color": "&H00FF00FF",
+        "outline_color": "&H00FF00FF",
+        "font_size": 64,
+        "id": "neon-sign"
+    },
+    "karaoke-classic": {
+        "font": "Marble",
+        "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00000000",
+        "font_size": 62,
+        "id": "karaoke-classic"
+    },
+    "fade-in-out": {
+        "font": "Folkies Vantage",
+        "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00333333",
+        "font_size": 56,
+        "id": "fade-in-out"
+    },
+    "slide-up": {
+        "font": "Sink",
+        "primary_color": "&H00FFAA00",
+        "outline_color": "&H00000000",
+        "font_size": 60,
+        "id": "slide-up"
+    },
+    "zoom-burst": {
+        "font": "RoseMask",
+        "primary_color": "&H00FF69B4",
+        "outline_color": "&H00000000",
+        "font_size": 64,
+        "id": "zoom-burst"
+    },
+    "bounce-in": {
+        "font": "Might Night",
+        "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00FF0000",
+        "font_size": 68,
+        "id": "bounce-in"
+    },
+    "tiktok-yellow-box": {
+        "font": "Poppins",
+        "primary_color": "&H00000000",
+        "outline_color": "&H00000000",
+        "font_size": 62,
+        "id": "tiktok-yellow-box"
+    },
+    "tiktok-box-group": {
+        "font": "Poppins",
+        "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00000000",
+        "font_size": 58,
+        "id": "tiktok-box-group"
+    },
+    "sakura-dream": {
+        "font": "Brume",
+        "primary_color": "&H00FF69B4",
+        "outline_color": "&H00FFFFFF",
+        "font_size": 68,
+        "id": "sakura-dream"
     }
 }
 
@@ -266,7 +402,8 @@ def run_ffmpeg_burn(video_path: Path, ass_path: Path, output_path: Path, resolut
 
     # Escape Windows drive colon for ffmpeg ass filter (expects \: in path)
     ass_path_str = ass_path.as_posix().replace(":", r"\:")
-    vf = f"ass=filename='{ass_path_str}',{scale_filter}"
+    fonts_dir_str = FONTS_DIR.as_posix().replace(":", r"\:")
+    vf = f"ass=filename='{ass_path_str}':fontsdir='{fonts_dir_str}',{scale_filter}"
     cmd = [
         "ffmpeg",
         "-y",
@@ -337,11 +474,20 @@ async def transcribe(
         words = []
         for seg in segments:
             for w in seg.words:
+                # Remove punctuation from word text
+                clean_text = w.word.strip()
+                # Remove common punctuation marks
+                clean_text = clean_text.strip('.,!?;:"\'-()[]{}')
+                
+                # Skip if text becomes empty after cleaning
+                if not clean_text:
+                    continue
+                    
                 words.append(
                     {
                         "start": round(w.start, 3),
                         "end": round(w.end, 3),
-                        "text": w.word.strip(),
+                        "text": clean_text,
                         "confidence": round(getattr(w, "probability", 0) or 0, 3),
                     }
                 )

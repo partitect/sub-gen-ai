@@ -243,3 +243,618 @@ Style: Default, {font}, {font_size}, {primary}, &H000000FF, {outline}, &H0000000
             # We will just do a clean slide up.
             return [f"Dialogue: 1,{ms_to_ass(start)},{ms_to_ass(end)},Default,,0,0,0,,{{\\an5\\move({cx},{cy+20},{cx},{cy},0,100)}}{word['text']}"]
         return self._base_loop(effect)
+
+    # --- 16. Pulse (Karaoke) ---
+    def render_pulse(self) -> str:
+        def effect(word, start, end, dur, cx, cy):
+            res = []
+            # Main text with pulsing effect
+            mid = dur // 2
+            pulse = f"\\t(0,{mid},\\fscx115\\fscy115\\blur10)\\t({mid},{dur},\\fscx100\\fscy100\\blur2)"
+            res.append(f"Dialogue: 1,{ms_to_ass(start)},{ms_to_ass(end)},Default,,0,0,0,,{{\\an5\\pos({cx},{cy})\\fad(50,50){pulse}}}{word['text']}")
+            
+            # Add expanding rings
+            for i in range(3):
+                ring_start = start + i * 100
+                ring_end = ring_start + 600
+                scale_start = 100 + i * 20
+                scale_end = 350 + i * 50
+                res.append(f"Dialogue: 0,{ms_to_ass(ring_start)},{ms_to_ass(ring_end)},Default,,0,0,0,,{{\\an5\\pos({cx},{cy})\\1a&HFF&\\3c&HFFFFFF&\\bord2\\fscx{scale_start}\\fscy{scale_start}\\t(\\fscx{scale_end}\\fscy{scale_end}\\alpha&HFF&)\\p1}}m 0 -15 b -21 -15 -21 16 0 16 b 23 16 23 -15 0 -15{{\\p0}}")
+            return res
+        return self._base_loop(effect)
+
+    # --- 17. Bubble Floral ---
+    def render_bubble_floral(self) -> str:
+        bubble_shape = "m 0 -15 b -21 -15 -21 16 0 16 b 23 16 23 -15 0 -15"
+        
+        def effect(word, start, end, dur, cx, cy):
+            res = []
+            # Main text with rotation
+            rotation = random.choice([-15, 15])
+            res.append(f"Dialogue: 1,{ms_to_ass(start)},{ms_to_ass(end)},Default,,0,0,0,,{{\\an5\\move({cx},{cy+20},{cx},{cy})\\frz{rotation}\\t(\\frz0)\\fad(100,100)}}{word['text']}")
+            
+            # Bubbles rising up
+            for _ in range(8):
+                bx = cx + random.randint(-50, 50)
+                by = cy + random.randint(-100, 50)
+                ey = by - random.randint(100, 200)
+                b_start = start + random.randint(0, dur // 2)
+                b_end = b_start + random.randint(800, 1200)
+                size = random.randint(10, 30)
+                res.append(f"Dialogue: 0,{ms_to_ass(b_start)},{ms_to_ass(b_end)},Default,,0,0,0,,{{\\an5\\move({bx},{by},{bx},{ey})\\fscx{size}\\fscy{size}\\1c&HFFFFFF&\\3c&HFFFFFF&\\blur5\\fad(100,200)\\p1}}{bubble_shape}{{\\p0}}")
+            return res
+        return self._base_loop(effect)
+
+    # --- 18. Falling Heart ---
+    def render_falling_heart(self) -> str:
+        heart_shape = "m 18 40 b 23 29 35 27 35 16 b 36 8 23 0 18 11 b 14 0 0 8 1 16 b 1 27 14 29 18 40"
+        
+        def effect(word, start, end, dur, cx, cy):
+            res = []
+            # Main text falling and rotating
+            res.append(f"Dialogue: 1,{ms_to_ass(start)},{ms_to_ass(end)},Default,,0,0,0,,{{\\an5\\move({cx},{cy-50},{cx},{cy})\\frz{random.randint(-20, 20)}\\t(\\frz0)\\fad(300,100)}}{word['text']}")
+            
+            # Falling hearts
+            for _ in range(15):
+                hx = cx + random.randint(-80, 80)
+                hy = cy - random.randint(50, 100)
+                ey = cy + random.randint(50, 150)
+                h_start = start + random.randint(0, dur)
+                h_end = h_start + random.randint(1000, 1500)
+                size = random.randint(20, 40)
+                rotation = random.choice([-500, 500, -700, 700])
+                color = random.choice(["&HFF69B4&", "&HFF1493&", "&HFF00FF&"])
+                res.append(f"Dialogue: 0,{ms_to_ass(h_start)},{ms_to_ass(h_end)},Default,,0,0,0,,{{\\an5\\move({hx},{hy},{hx + random.randint(-50, 50)},{ey})\\fscx{size}\\fscy{size}\\1c{color}\\blur5\\frz0\\t(\\frz{rotation})\\fad(300,300)\\p1}}{heart_shape}{{\\p0}}")
+            return res
+        return self._base_loop(effect)
+
+    # --- 19. Colorful (Rainbow Cycle) ---
+    def render_colorful(self) -> str:
+        def effect(word, start, end, dur, cx, cy):
+            res = []
+            # Cycle through rainbow colors
+            colors = ["&H0000FF&", "&H00FFFF&", "&H00FF00&", "&HFFFF00&", "&HFF0000&", "&HFF00FF&"]
+            step = dur // len(colors)
+            
+            color_transforms = ""
+            for i, color in enumerate(colors):
+                t_start = i * step
+                t_end = (i + 1) * step
+                color_transforms += f"\\t({t_start},{t_end},\\1c{color})"
+            
+            res.append(f"Dialogue: 1,{ms_to_ass(start)},{ms_to_ass(end)},Default,,0,0,0,,{{\\an5\\pos({cx},{cy})\\fscx110\\fscy110\\blur3{color_transforms}\\fad(100,100)}}{word['text']}")
+            
+            # Color particles
+            for _ in range(10):
+                px = cx + random.randint(-60, 60)
+                py = cy + random.randint(-40, 40)
+                ex = px + random.randint(-100, 100)
+                ey = py + random.randint(-100, 100)
+                p_start = start + random.randint(0, dur // 2)
+                p_end = p_start + random.randint(400, 800)
+                p_color = random.choice(colors)
+                res.append(f"Dialogue: 0,{ms_to_ass(p_start)},{ms_to_ass(p_end)},Default,,0,0,0,,{{\\an5\\move({px},{py},{ex},{ey})\\1c{p_color}\\fscx15\\fscy15\\blur4\\fad(0,200)\\p1}}m 0 0 l 10 0 10 10 0 10{{\\p0}}")
+            return res
+        return self._base_loop(effect)
+
+    # --- 20. Ghost Star ---
+    def render_ghost_star(self) -> str:
+        star_shape = "m 30 23 b 24 23 24 33 30 33 b 36 33 37 23 30 23 m 35 27 l 61 28 l 35 29 m 26 27 l 0 28 l 26 29"
+        
+        def effect(word, start, end, dur, cx, cy):
+            res = []
+            # Main text with glow
+            res.append(f"Dialogue: 1,{ms_to_ass(start)},{ms_to_ass(end)},Default,,0,0,0,,{{\\an5\\pos({cx},{cy})\\blur8\\fscx105\\fscy105\\t(\\blur2\\fscx100\\fscy100)\\fad(150,150)}}{word['text']}")
+            
+            # Ghost stars floating around
+            for _ in range(12):
+                sx = cx + random.randint(-100, 100)
+                sy = cy + random.randint(-80, 80)
+                angle = random.uniform(0, 360)
+                distance = random.uniform(80, 150)
+                ex = sx + math.cos(math.radians(angle)) * distance
+                ey = sy + math.sin(math.radians(angle)) * distance
+                s_start = start + random.randint(0, dur)
+                s_end = s_start + random.randint(800, 1200)
+                size = random.randint(15, 35)
+                star_color = random.choice(["&HFFFFFF&", "&HFFFF00&", "&H00FFFF&"])
+                res.append(f"Dialogue: 0,{ms_to_ass(s_start)},{ms_to_ass(s_end)},Default,,0,0,0,,{{\\an5\\move({int(sx)},{int(sy)},{int(ex)},{int(ey)})\\fscx{size}\\fscy{size}\\1c{star_color}\\blur6\\frz0\\t(\\frz360)\\fad(200,300)\\p1}}{star_shape}{{\\p0}}")
+            return res
+        return self._base_loop(effect)
+
+    # --- 21. TikTok Group (2-3 words, active highlighted) ---
+    def render_tiktok_group(self) -> str:
+        """Shows 2-3 words at once with active word highlighted"""
+        lines = ["[Events]", "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"]
+        
+        alignment = int(self.style.get("alignment", 2))
+        screen_h = 1080
+        cx = 1920 // 2
+        
+        if alignment == 8:
+            cy = 150
+        elif alignment == 5:
+            cy = screen_h // 2
+        else:
+            cy = screen_h - 150
+        
+        for i, word in enumerate(self.words):
+            start_ms = int(word['start'] * 1000)
+            end_ms = int(word['end'] * 1000)
+            
+            # Build the text group: previous + CURRENT + next
+            text_parts = []
+            
+            # Previous word (dimmed)
+            if i > 0:
+                prev_word = self.words[i-1]['text']
+                text_parts.append(f"{{\\alpha&H80&\\fscx90\\fscy90}}{prev_word}")
+            
+            # Current word (highlighted)
+            curr_word = word['text']
+            text_parts.append(f"{{\\alpha&H00&\\fscx120\\fscy120\\1c&HFFFF00&\\blur3}}{curr_word}")
+            
+            # Next word (dimmed)
+            if i < len(self.words) - 1:
+                next_word = self.words[i+1]['text']
+                text_parts.append(f"{{\\alpha&H80&\\fscx90\\fscy90}}{next_word}")
+            
+            # Join with spaces
+            full_text = " ".join(text_parts)
+            
+            lines.append(f"Dialogue: 1,{ms_to_ass(start_ms)},{ms_to_ass(end_ms)},Default,,0,0,0,,{{\\an5\\pos({cx},{cy})\\fad(100,100)}}{full_text}")
+        
+        return self.header + "\n".join(lines)
+
+    # --- 22. Matrix Rain ---
+    def render_matrix_rain(self) -> str:
+        def effect(word, start, end, dur, cx, cy):
+            res = []
+            res.append(f"Dialogue: 1,{ms_to_ass(start)},{ms_to_ass(end)},Default,,0,0,0,,{{\\an5\\pos({cx},{cy})\\1c&H00FF00&\\fad(100,100)}}{word['text']}")
+            
+            chars = "01アイウエオカキクケコ"
+            for _ in range(15):
+                char = random.choice(chars)
+                x = cx + random.randint(-200, 200)
+                y_start = cy - random.randint(200, 400)
+                y_end = cy + random.randint(100, 300)
+                c_start = start + random.randint(0, dur)
+                c_end = c_start + random.randint(500, 1000)
+                res.append(f"Dialogue: 0,{ms_to_ass(c_start)},{ms_to_ass(c_end)},Default,,0,0,0,,{{\\an5\\move({x},{y_start},{x},{y_end})\\1c&H00FF00&\\alpha&H80&\\fscx50\\fscy50\\fad(0,200)}}{char}")
+            return res
+        return self._base_loop(effect)
+
+    # --- 23. Electric Shock ---
+    def render_electric_shock(self) -> str:
+        lightning_shape = "m 0 0 l 5 20 l -3 20 l 8 40 l -10 25 l 0 25"
+        
+        def effect(word, start, end, dur, cx, cy):
+            res = []
+            shake = "".join([f"\\t({i*50},{(i+1)*50},\\frz{random.randint(-3,3)})" for i in range(min(dur//50, 10))])
+            res.append(f"Dialogue: 1,{ms_to_ass(start)},{ms_to_ass(end)},Default,,0,0,0,,{{\\an5\\pos({cx},{cy})\\1c&HFFFF00&{shake}}}{word['text']}")
+            
+            for _ in range(6):
+                lx = cx + random.randint(-80, 80)
+                ly = cy + random.randint(-60, 60)
+                l_start = start + random.randint(0, dur//2)
+                l_end = l_start + random.randint(50, 150)
+                rotation = random.randint(0, 360)
+                res.append(f"Dialogue: 0,{ms_to_ass(l_start)},{ms_to_ass(l_end)},Default,,0,0,0,,{{\\an5\\pos({lx},{ly})\\frz{rotation}\\1c&HFFFF00&\\fscx80\\fscy80\\fad(0,50)\\p1}}{lightning_shape}{{\\p0}}")
+            return res
+        return self._base_loop(effect)
+
+    # --- 24. Smoke Trail ---
+    def render_smoke_trail(self) -> str:
+        smoke_shape = "m 0 0 b 10 -5 20 -5 30 0 b 20 5 10 5 0 0"
+        
+        def effect(word, start, end, dur, cx, cy):
+            res = []
+            res.append(f"Dialogue: 1,{ms_to_ass(start)},{ms_to_ass(end)},Default,,0,0,0,,{{\\an5\\pos({cx},{cy})\\fad(100,300)\\t({max(dur-200,0)},{dur},\\alpha&HFF&\\blur10)}}{word['text']}")
+            
+            for _ in range(10):
+                sx = cx + random.randint(-40, 40)
+                sy = cy + random.randint(-20, 20)
+                ey = sy - random.randint(50, 100)
+                s_start = start + random.randint(max(dur//2,0), dur)
+                s_end = s_start + random.randint(800, 1200)
+                size = random.randint(30, 60)
+                res.append(f"Dialogue: 0,{ms_to_ass(s_start)},{ms_to_ass(s_end)},Default,,0,0,0,,{{\\an5\\move({sx},{sy},{sx + random.randint(-30,30)},{ey})\\fscx{size}\\fscy{size}\\1c&HCCCCCC&\\alpha&H40&\\blur8\\t(\\alpha&HFF&\\fscx{size*2}\\fscy{size*2})\\p1}}{smoke_shape}{{\\p0}}")
+            return res
+        return self._base_loop(effect)
+
+    # --- 25. Pixel Glitch ---
+    def render_pixel_glitch(self) -> str:
+        def effect(word, start, end, dur, cx, cy):
+            res = []
+            colors = ["&HFF0000&", "&H00FF00&", "&H0000FF&", "&HFFFFFF&"]
+            for i, color in enumerate(colors):
+                offset_x = random.randint(-5, 5)
+                offset_y = random.randint(-3, 3)
+                glitch_count = min(dur//100, 8)
+                glitch_times = "".join([f"\\t({j*100},{(j+1)*100},\\pos({cx + random.randint(-10,10)},{cy + random.randint(-5,5)}))" for j in range(glitch_count)])
+                res.append(f"Dialogue: {i},{ms_to_ass(start)},{ms_to_ass(end)},Default,,0,0,0,,{{\\an5\\pos({cx + offset_x},{cy + offset_y})\\1c{color}\\alpha&H60&{glitch_times}}}{word['text']}")
+            return res
+        return self._base_loop(effect)
+
+    # --- 26. Neon Sign ---
+    def render_neon_sign(self) -> str:
+        def effect(word, start, end, dur, cx, cy):
+            res = []
+            flicker = ""
+            t = 0
+            while t < min(dur, 1000):
+                if random.random() < 0.3:
+                    flicker += f"\\t({t},{t+50},\\alpha&HFF&)\\t({t+50},{t+100},\\alpha&H00&)"
+                    t += 100
+                else:
+                    t += 100
+            
+            res.append(f"Dialogue: 1,{ms_to_ass(start)},{ms_to_ass(end)},Default,,0,0,0,,{{\\an5\\pos({cx},{cy})\\1c&HFF00FF&\\3c&HFF00FF&\\bord3\\blur5{flicker}}}{word['text']}")
+            return res
+        return self._base_loop(effect)
+
+    # --- 27. Karaoke Classic (3 words) ---
+    def render_karaoke_classic(self) -> str:
+        lines = ["[Events]", "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"]
+        alignment = int(self.style.get("alignment", 2))
+        screen_h = 1080
+        cx = 1920 // 2
+        cy = screen_h - 150 if alignment == 2 else (150 if alignment == 8 else screen_h // 2)
+        
+        for i, word in enumerate(self.words):
+            start_ms = int(word['start'] * 1000)
+            end_ms = int(word['end'] * 1000)
+            
+            text_parts = []
+            if i > 0:
+                text_parts.append(f"{{\\alpha&HA0&\\fscx85\\fscy85}}{self.words[i-1]['text']}")
+            text_parts.append(f"{{\\alpha&H00&\\fscx130\\fscy130\\1c&HFFFF00&\\blur4}}{word['text']}")
+            if i < len(self.words) - 1:
+                text_parts.append(f"{{\\alpha&HA0&\\fscx85\\fscy85}}{self.words[i+1]['text']}")
+            
+            full_text = " ".join(text_parts)
+            lines.append(f"Dialogue: 1,{ms_to_ass(start_ms)},{ms_to_ass(end_ms)},Default,,0,0,0,,{{\\an5\\pos({cx},{cy})\\fad(80,80)}}{full_text}")
+        
+        return self.header + "\n".join(lines)
+
+    # --- 28. Fade In Out (sentence) ---
+    def render_fade_in_out(self) -> str:
+        lines = ["[Events]", "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"]
+        alignment = int(self.style.get("alignment", 2))
+        screen_h = 1080
+        cx = 1920 // 2
+        cy = screen_h - 150 if alignment == 2 else (150 if alignment == 8 else screen_h // 2)
+        
+        sentence_length = 5
+        for sent_start in range(0, len(self.words), sentence_length):
+            sent_words = self.words[sent_start:sent_start + sentence_length]
+            if not sent_words:
+                continue
+                
+            start_ms = int(sent_words[0]['start'] * 1000)
+            end_ms = int(sent_words[-1]['end'] * 1000)
+            full_text = " ".join([w['text'] for w in sent_words])
+            
+            lines.append(f"Dialogue: 1,{ms_to_ass(start_ms)},{ms_to_ass(end_ms)},Default,,0,0,0,,{{\\an5\\pos({cx},{cy})\\fad(400,400)}}{full_text}")
+        
+        return self.header + "\n".join(lines)
+
+    # --- 29. Slide Up ---
+    def render_slide_up(self) -> str:
+        lines = ["[Events]", "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"]
+        alignment = int(self.style.get("alignment", 2))
+        screen_h = 1080
+        cx = 1920 // 2
+        cy = screen_h - 150 if alignment == 2 else (150 if alignment == 8 else screen_h // 2)
+        
+        sentence_length = 4
+        for sent_start in range(0, len(self.words), sentence_length):
+            sent_words = self.words[sent_start:sent_start + sentence_length]
+            if not sent_words:
+                continue
+                
+            start_ms = int(sent_words[0]['start'] * 1000)
+            end_ms = int(sent_words[-1]['end'] * 1000)
+            full_text = " ".join([w['text'] for w in sent_words])
+            
+            lines.append(f"Dialogue: 1,{ms_to_ass(start_ms)},{ms_to_ass(end_ms)},Default,,0,0,0,,{{\\an5\\move({cx},{cy + 100},{cx},{cy},0,300)\\fad(100,200)}}{full_text}")
+        
+        return self.header + "\n".join(lines)
+
+    # --- 30. Zoom Burst ---
+    def render_zoom_burst(self) -> str:
+        lines = ["[Events]", "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"]
+        alignment = int(self.style.get("alignment", 2))
+        screen_h = 1080
+        cx = 1920 // 2
+        cy = screen_h - 150 if alignment == 2 else (150 if alignment == 8 else screen_h // 2)
+        
+        sentence_length = 4
+        for sent_start in range(0, len(self.words), sentence_length):
+            sent_words = self.words[sent_start:sent_start + sentence_length]
+            if not sent_words:
+                continue
+                
+            start_ms = int(sent_words[0]['start'] * 1000)
+            end_ms = int(sent_words[-1]['end'] * 1000)
+            full_text = " ".join([w['text'] for w in sent_words])
+            
+            lines.append(f"Dialogue: 1,{ms_to_ass(start_ms)},{ms_to_ass(end_ms)},Default,,0,0,0,,{{\\an5\\pos({cx},{cy})\\fscx0\\fscy0\\t(0,300,\\fscx100\\fscy100)\\fad(0,200)}}{full_text}")
+        
+        return self.header + "\n".join(lines)
+
+    # --- 31. Bounce In ---
+    def render_bounce_in(self) -> str:
+        lines = ["[Events]", "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"]
+        alignment = int(self.style.get("alignment", 2))
+        screen_h = 1080
+        cx = 1920 // 2
+        cy = screen_h - 150 if alignment == 2 else (150 if alignment == 8 else screen_h // 2)
+        
+        sentence_length = 4
+        for sent_start in range(0, len(self.words), sentence_length):
+            sent_words = self.words[sent_start:sent_start + sentence_length]
+            if not sent_words:
+                continue
+                
+            start_ms = int(sent_words[0]['start'] * 1000)
+            end_ms = int(sent_words[-1]['end'] * 1000)
+            full_text = " ".join([w['text'] for w in sent_words])
+            
+            # Bounce effect with multiple transforms
+            bounce = "\\t(0,150,\\fscx120\\fscy120)\\t(150,250,\\fscx95\\fscy95)\\t(250,350,\\fscx105\\fscy105)\\t(350,400,\\fscx100\\fscy100)"
+            lines.append(f"Dialogue: 1,{ms_to_ass(start_ms)},{ms_to_ass(end_ms)},Default,,0,0,0,,{{\\an5\\move({cx},{cy - 100},{cx},{cy},0,400){bounce}\\fad(0,200)}}{full_text}")
+        
+        return self.header + "\n".join(lines)
+
+    # --- 32. TikTok Yellow Box (Single Word) ---
+    def render_tiktok_yellow_box(self) -> str:
+        def effect(word, start, end, dur, cx, cy):
+            res = []
+            text = word['text']
+            
+            # Calculate box dimensions based on text length
+            char_width = 35  # Approximate width per character
+            text_width = len(text) * char_width
+            box_w = text_width + 60  # Add padding
+            box_h = 90
+            
+            # Create rounded rectangle shape (approximation with bezier curves)
+            radius = 15
+            box_shape = f"m {radius} 0 l {box_w-radius} 0 b {box_w} 0 {box_w} {radius} {box_w} {radius} l {box_w} {box_h-radius} b {box_w} {box_h} {box_w-radius} {box_h} {box_w-radius} {box_h} l {radius} {box_h} b 0 {box_h} 0 {box_h-radius} 0 {box_h-radius} l 0 {radius} b 0 0 {radius} 0 {radius} 0"
+            
+            # Background box (yellow with slight transparency)
+            box_start = start
+            box_end = end
+            res.append(f"Dialogue: 0,{ms_to_ass(box_start)},{ms_to_ass(box_end)},Default,,0,0,0,,{{\\an5\\pos({cx},{cy})\\p1\\1c&H00FFFF&\\alpha&H20&\\blur2\\fscx100\\fscy100\\t(0,150,\\fscx105\\fscy105)\\t(150,{dur},\\fscx100\\fscy100)}}{box_shape}{{\\p0}}")
+            
+            # Text (black, bold)
+            res.append(f"Dialogue: 1,{ms_to_ass(start)},{ms_to_ass(end)},Default,,0,0,0,,{{\\an5\\pos({cx},{cy})\\1c&H000000&\\b1\\fscx110\\fscy110\\t(0,150,\\fscx120\\fscy120)\\t(150,{dur},\\fscx110\\fscy110)}}{text}")
+            
+            return res
+        return self._base_loop(effect)
+
+    # --- 33. TikTok Box Group (3 Words with Line Wrap) ---
+    def render_tiktok_box_group(self) -> str:
+        lines = ["[Events]", "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"]
+        alignment = int(self.style.get("alignment", 2))
+        screen_h = 1080
+        screen_w = 1920
+        cx = screen_w // 2
+        cy = screen_h - 150 if alignment == 2 else (150 if alignment == 8 else screen_h // 2)
+        
+        max_line_width = screen_w - 200  # Leave margins
+        
+        for i, word in enumerate(self.words):
+            start_ms = int(word['start'] * 1000)
+            end_ms = int(word['end'] * 1000)
+            dur = end_ms - start_ms
+            
+            # Build word group
+            words_group = []
+            
+            # Previous word (dimmed, no box)
+            if i > 0:
+                prev_word = self.words[i-1]['text']
+                words_group.append({'text': prev_word, 'active': False})
+            
+            # Current word (highlighted with yellow box)
+            curr_word = word['text']
+            words_group.append({'text': curr_word, 'active': True})
+            
+            # Next word (dimmed, no box)
+            if i < len(self.words) - 1:
+                next_word = self.words[i+1]['text']
+                words_group.append({'text': next_word, 'active': False})
+            
+            # Calculate if words fit on one line
+            char_width = 35
+            spacing = 50
+            total_width = sum([len(w['text']) * char_width + spacing for w in words_group])
+            
+            if total_width > max_line_width:
+                # Multi-line layout: stack vertically
+                line_spacing = 100
+                start_y = cy - (len(words_group) - 1) * line_spacing // 2
+                
+                for idx, w in enumerate(words_group):
+                    word_y = start_y + idx * line_spacing
+                    word_x = cx
+                    
+                    if w['active']:
+                        # Active word: yellow box + black bold text
+                        text_width = len(w['text']) * char_width
+                        box_w = text_width + 50
+                        box_h = 80
+                        radius = 12
+                        
+                        # Rounded box shape
+                        box_shape = f"m {radius} 0 l {box_w-radius} 0 b {box_w} 0 {box_w} {radius} {box_w} {radius} l {box_w} {box_h-radius} b {box_w} {box_h} {box_w-radius} {box_h} {box_w-radius} {box_h} l {radius} {box_h} b 0 {box_h} 0 {box_h-radius} 0 {box_h-radius} l 0 {radius} b 0 0 {radius} 0 {radius} 0"
+                        
+                        # Yellow box
+                        lines.append(f"Dialogue: 0,{ms_to_ass(start_ms)},{ms_to_ass(end_ms)},Default,,0,0,0,,{{\\an5\\pos({word_x},{word_y})\\p1\\1c&H00FFFF&\\alpha&H20&\\blur2\\t(0,120,\\fscx105\\fscy105)\\t(120,{dur},\\fscx100\\fscy100)}}{box_shape}{{\\p0}}")
+                        
+                        # Black bold text
+                        lines.append(f"Dialogue: 1,{ms_to_ass(start_ms)},{ms_to_ass(end_ms)},Default,,0,0,0,,{{\\an5\\pos({word_x},{word_y})\\1c&H000000&\\b1\\fscx115\\fscy115\\t(0,120,\\fscx125\\fscy125)\\t(120,{dur},\\fscx115\\fscy115)}}{w['text']}")
+                    else:
+                        # Inactive word: gray, smaller, no box
+                        lines.append(f"Dialogue: 1,{ms_to_ass(start_ms)},{ms_to_ass(end_ms)},Default,,0,0,0,,{{\\an5\\pos({word_x},{word_y})\\1c&H808080&\\alpha&H60&\\fscx90\\fscy90}}{w['text']}")
+            else:
+                # Single line layout: horizontal
+                start_x = cx - total_width // 2
+                current_x = start_x
+                
+                for w in words_group:
+                    word_width = len(w['text']) * char_width
+                    word_x = current_x + word_width // 2
+                    
+                    if w['active']:
+                        # Active word: yellow box + black bold text
+                        text_width = len(w['text']) * char_width
+                        box_w = text_width + 50
+                        box_h = 80
+                        radius = 12
+                        
+                        # Rounded box shape
+                        box_shape = f"m {radius} 0 l {box_w-radius} 0 b {box_w} 0 {box_w} {radius} {box_w} {radius} l {box_w} {box_h-radius} b {box_w} {box_h} {box_w-radius} {box_h} {box_w-radius} {box_h} l {radius} {box_h} b 0 {box_h} 0 {box_h-radius} 0 {box_h-radius} l 0 {radius} b 0 0 {radius} 0 {radius} 0"
+                        
+                        # Yellow box
+                        lines.append(f"Dialogue: 0,{ms_to_ass(start_ms)},{ms_to_ass(end_ms)},Default,,0,0,0,,{{\\an5\\pos({word_x},{cy})\\p1\\1c&H00FFFF&\\alpha&H20&\\blur2\\t(0,120,\\fscx105\\fscy105)\\t(120,{dur},\\fscx100\\fscy100)}}{box_shape}{{\\p0}}")
+                        
+                        # Black bold text
+                        lines.append(f"Dialogue: 1,{ms_to_ass(start_ms)},{ms_to_ass(end_ms)},Default,,0,0,0,,{{\\an5\\pos({word_x},{cy})\\1c&H000000&\\b1\\fscx115\\fscy115\\t(0,120,\\fscx125\\fscy125)\\t(120,{dur},\\fscx115\\fscy115)}}{w['text']}")
+                    else:
+                        # Inactive word: gray, smaller, no box
+                        lines.append(f"Dialogue: 1,{ms_to_ass(start_ms)},{ms_to_ass(end_ms)},Default,,0,0,0,,{{\\an5\\pos({word_x},{cy})\\1c&H808080&\\alpha&H60&\\fscx90\\fscy90}}{w['text']}")
+                    
+                    current_x += word_width + spacing
+        
+        return self.header + "\n".join(lines)
+
+    # --- 34. SAKURA DREAM (Ultra Complex!) ---
+    def render_sakura_dream(self) -> str:
+        # Cherry blossom petal shape (detailed)
+        sakura_petal = "m 18 40 b 23 29 35 27 35 16 b 36 8 23 0 18 11 b 14 0 0 8 1 16 b 1 27 14 29 18 40"
+        
+        # Sparkle shape
+        sparkle = "m 0 -8 l 2 -2 8 0 2 2 0 8 -2 2 -8 0 -2 -2"
+        
+        def effect(word, start, end, dur, cx, cy):
+            res = []
+            text = word['text']
+            
+            # === LAYER 1: Background Glow ===
+            glow_colors = ["&HFF69B4&", "&HFF1493&", "&HFF00FF&"]
+            for i, color in enumerate(glow_colors):
+                offset = (i - 1) * 3
+                res.append(f"Dialogue: 0,{ms_to_ass(start)},{ms_to_ass(end)},Default,,0,0,0,,{{\\an5\\pos({cx + offset},{cy + offset})\\1c{color}\\blur15\\alpha&H80&\\t(0,{dur//2},\\blur20)\\t({dur//2},{dur},\\blur15)}}{text}")
+            
+            # === LAYER 2: Main Text with Gradient Effect ===
+            # Create gradient by layering multiple colored texts
+            gradient_colors = [
+                ("&HFF1493&", 0, 0),      # Deep pink
+                ("&HFF69B4&", 2, 1),      # Hot pink
+                ("&HFFC0CB&", 4, 2),      # Light pink
+            ]
+            
+            for color, offset_x, offset_y in gradient_colors:
+                res.append(f"Dialogue: 1,{ms_to_ass(start)},{ms_to_ass(end)},Default,,0,0,0,,{{\\an5\\pos({cx + offset_x},{cy + offset_y})\\1c{color}\\bord2\\3c&HFFFFFF&\\blur1\\fscx110\\fscy110\\t(0,150,\\fscx120\\fscy120)\\t(150,{dur},\\fscx110\\fscy110)}}{text}")
+            
+            # === LAYER 3: Rotating Sakura Petals (3D Spiral) ===
+            petal_count = 20
+            for i in range(petal_count):
+                # Calculate spiral trajectory
+                angle_start = (i * 360 / petal_count) + random.randint(-30, 30)
+                angle_end = angle_start + random.choice([360, -360, 720, -720])
+                
+                # Distance from center (creates spiral)
+                radius_start = random.randint(80, 150)
+                radius_end = random.randint(20, 60)
+                
+                # Calculate positions
+                start_angle_rad = math.radians(angle_start)
+                end_angle_rad = math.radians(angle_end)
+                
+                px_start = cx + int(math.cos(start_angle_rad) * radius_start)
+                py_start = cy + int(math.sin(start_angle_rad) * radius_start)
+                px_end = cx + int(math.cos(end_angle_rad) * radius_end)
+                py_end = cy + int(math.sin(end_angle_rad) * radius_end)
+                
+                # Petal timing
+                petal_start = start + random.randint(0, dur // 3)
+                petal_end = petal_start + random.randint(800, 1500)
+                
+                # 3D scale effect (simulates depth)
+                scale_start = random.randint(40, 80)
+                scale_end = random.randint(10, 30)
+                
+                # Rotation
+                rotation = random.randint(-720, 720)
+                
+                # Petal color variations
+                petal_colors = ["&HFFC0CB&", "&HFF69B4&", "&HFF1493&", "&HFFFFFF&"]
+                petal_color = random.choice(petal_colors)
+                
+                # Alpha variation for depth
+                alpha_start = random.choice(["&H00&", "&H20&", "&H40&"])
+                alpha_end = "&HFF&"
+                
+                res.append(f"Dialogue: 0,{ms_to_ass(petal_start)},{ms_to_ass(petal_end)},Default,,0,0,0,,{{\\an5\\move({px_start},{py_start},{px_end},{py_end})\\fscx{scale_start}\\fscy{scale_start}\\t(\\fscx{scale_end}\\fscy{scale_end})\\frz0\\t(\\frz{rotation})\\1c{petal_color}\\alpha{alpha_start}\\t(\\alpha{alpha_end})\\blur4\\p1}}{sakura_petal}{{\\p0}}")
+            
+            # === LAYER 4: Sparkles ===
+            sparkle_count = 15
+            for _ in range(sparkle_count):
+                sx = cx + random.randint(-120, 120)
+                sy = cy + random.randint(-80, 80)
+                
+                # Random movement
+                ex = sx + random.randint(-50, 50)
+                ey = sy + random.randint(-50, 50)
+                
+                s_start = start + random.randint(0, dur)
+                s_end = s_start + random.randint(300, 600)
+                
+                # Twinkle effect
+                sparkle_size = random.randint(15, 35)
+                sparkle_color = random.choice(["&HFFFFFF&", "&HFFFF00&", "&HFF69B4&"])
+                
+                res.append(f"Dialogue: 0,{ms_to_ass(s_start)},{ms_to_ass(s_end)},Default,,0,0,0,,{{\\an5\\move({sx},{sy},{ex},{ey})\\fscx{sparkle_size}\\fscy{sparkle_size}\\1c{sparkle_color}\\blur3\\t(0,{(s_end-s_start)//2},\\alpha&H00&)\\t({(s_end-s_start)//2},{s_end-s_start},\\alpha&HFF&)\\frz0\\t(\\frz360)\\p1}}{sparkle}{{\\p0}}")
+            
+            # === LAYER 5: Floating Petals (Slow Background) ===
+            bg_petal_count = 8
+            for _ in range(bg_petal_count):
+                bx = cx + random.randint(-200, 200)
+                by = cy + random.randint(-150, 150)
+                ey = by + random.randint(100, 200)
+                
+                b_start = start + random.randint(0, dur // 2)
+                b_end = b_start + random.randint(2000, 3000)
+                
+                drift_x = random.randint(-50, 50)
+                
+                bg_size = random.randint(25, 45)
+                bg_rotation = random.randint(-180, 180)
+                
+                res.append(f"Dialogue: 0,{ms_to_ass(b_start)},{ms_to_ass(b_end)},Default,,0,0,0,,{{\\an5\\move({bx},{by},{bx + drift_x},{ey})\\fscx{bg_size}\\fscy{bg_size}\\1c&HFFC0CB&\\alpha&H60&\\blur6\\frz{bg_rotation}\\t(\\frz{bg_rotation + 360})\\p1}}{sakura_petal}{{\\p0}}")
+            
+            # === LAYER 6: Light Rays ===
+            for i in range(4):
+                ray_angle = i * 90 + random.randint(-15, 15)
+                ray_length = random.randint(100, 150)
+                
+                ray_x = cx + int(math.cos(math.radians(ray_angle)) * ray_length)
+                ray_y = cy + int(math.sin(math.radians(ray_angle)) * ray_length)
+                
+                ray_start = start + random.randint(0, dur // 3)
+                ray_end = ray_start + random.randint(400, 700)
+                
+                # Simple line shape
+                ray_shape = f"m 0 0 l {ray_length} 0 l {ray_length} 3 l 0 3"
+                
+                res.append(f"Dialogue: 0,{ms_to_ass(ray_start)},{ms_to_ass(ray_end)},Default,,0,0,0,,{{\\an5\\pos({cx},{cy})\\frz{ray_angle}\\1c&HFFFFFF&\\alpha&H80&\\blur8\\t(\\alpha&HFF&)\\p1}}{ray_shape}{{\\p0}}")
+            
+            return res
+        
+        return self._base_loop(effect)
+
+

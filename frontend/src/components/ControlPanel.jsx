@@ -4,64 +4,64 @@ import { stylePool } from "./SubtitleOverlay";
 
 const presetStyleDefaults = {
   "fire-storm": {
-    primary_color: "#006DFF", // Orange-ish in BGR
+    primary_color: "#006DFF",
     outline_color: "#000000",
     font_size: 64,
-    font: "Archivo Black",
+    font: "Brown Beige",
   },
   "cyber-glitch": {
     primary_color: "#FFFFFF",
-    outline_color: "#0000FF", // Red-ish in BGR
+    outline_color: "#0000FF",
     font_size: 60,
-    font: "Roboto Mono",
+    font: "OverHeat Regular",
   },
   "neon-pulse": {
-    primary_color: "#7CFFFC", // Cyan
-    outline_color: "#FF00FF", // Magenta
+    primary_color: "#7CFFFC",
+    outline_color: "#FF00FF",
     font_size: 62,
-    font: "Inter",
+    font: "Thoge",
   },
   "kinetic-bounce": {
     primary_color: "#FFFFFF",
     outline_color: "#000000",
     font_size: 64,
-    font: "Sora",
+    font: "Press Start 2P",
   },
   "cinematic-blur": {
     primary_color: "#E0E0E0",
     outline_color: "#000000",
     font_size: 58,
-    font: "Montserrat",
+    font: "BlackCaps",
   },
   "thunder-strike": {
     primary_color: "#FFFF00",
     outline_color: "#000000",
     font_size: 66,
-    font: "Impact",
+    font: "Komika Axis",
   },
   "typewriter-pro": {
     primary_color: "#FFFFFF",
     outline_color: "#000000",
     font_size: 56,
-    font: "Courier New",
+    font: "OverHeat Regular",
   },
   "rainbow-wave": {
     primary_color: "#FFFFFF",
     outline_color: "#000000",
     font_size: 64,
-    font: "Fredoka One",
+    font: "Brown Beige",
   },
   "earthquake-shake": {
     primary_color: "#FF0000",
     outline_color: "#FFFFFF",
     font_size: 70,
-    font: "Bebas Neue",
+    font: "Thoge",
   },
   "word-pop": {
     primary_color: "#FFFFFF",
     outline_color: "#333333",
     font_size: 60,
-    font: "Poppins",
+    font: "Komika Axis",
   },
   "retro-arcade": {
     primary_color: "#00FF00",
@@ -79,7 +79,7 @@ const presetStyleDefaults = {
     primary_color: "#FFD700",
     outline_color: "#000000",
     font_size: 60,
-    font: "Montserrat",
+    font: "Brown Beige",
   },
   "comic-book": {
     primary_color: "#FFFFFF",
@@ -91,8 +91,57 @@ const presetStyleDefaults = {
     primary_color: "#FFFFFF",
     outline_color: "#000000",
     font_size: 48,
-    font: "Roboto Mono",
+    font: "Thoge",
   },
+  "pulse": {
+    primary_color: "#FFFFFF",
+    outline_color: "#FF00FF",
+    font_size: 62,
+    font: "Brown Beige",
+  },
+  "bubble-floral": {
+    primary_color: "#FFFFFF",
+    outline_color: "#FFBD00",
+    font_size: 58,
+    font: "Thoge",
+  },
+  "falling-heart": {
+    primary_color: "#000000",
+    outline_color: "#A5907E",
+    font_size: 64,
+    font: "OverHeat Regular",
+  },
+  "colorful": {
+    primary_color: "#FFFFFF",
+    outline_color: "#000000",
+    font_size: 60,
+    font: "Komika Axis",
+  },
+  "ghost-star": {
+    primary_color: "#FFFFFF",
+    outline_color: "#00FFFF",
+    font_size: 56,
+    font: "BlackCaps",
+  },
+  "tiktok-group": {
+    primary_color: "#FFFFFF",
+    outline_color: "#000000",
+    font_size: 58,
+    font: "Brown Beige",
+  },
+  "matrix-rain": { primary_color: "#00FF00", outline_color: "#000000", font_size: 54, font: "Monigue" },
+  "electric-shock": { primary_color: "#FFFF00", outline_color: "#000000", font_size: 66, font: "Chunko Bold" },
+  "smoke-trail": { primary_color: "#CCCCCC", outline_color: "#666666", font_size: 58, font: "Brume" },
+  "pixel-glitch": { primary_color: "#FFFFFF", outline_color: "#FF0000", font_size: 60, font: "Tallica" },
+  "neon-sign": { primary_color: "#FF00FF", outline_color: "#FF00FF", font_size: 64, font: "Oslla" },
+  "karaoke-classic": { primary_color: "#FFFFFF", outline_color: "#000000", font_size: 62, font: "Marble" },
+  "fade-in-out": { primary_color: "#FFFFFF", outline_color: "#333333", font_size: 56, font: "Folkies Vantage" },
+  "slide-up": { primary_color: "#FFAA00", outline_color: "#000000", font_size: 60, font: "Sink" },
+  "zoom-burst": { primary_color: "#FF69B4", outline_color: "#000000", font_size: 64, font: "RoseMask" },
+  "bounce-in": { primary_color: "#FFFFFF", outline_color: "#FF0000", font_size: 68, font: "Might Night" },
+  "tiktok-yellow-box": { primary_color: "#000000", outline_color: "#000000", font_size: 62, font: "Poppins" },
+  "tiktok-box-group": { primary_color: "#FFFFFF", outline_color: "#000000", font_size: 58, font: "Poppins" },
+  "sakura-dream": { primary_color: "#FF69B4", outline_color: "#FFFFFF", font_size: 68, font: "Brume" },
 };
 
 const googleFonts = [
@@ -109,6 +158,19 @@ const googleFonts = [
   "Press Start 2P",
   "Komika Axis",
   "BlackCaps",
+  "Brown Beige",
+  "Thoge",
+  "OverHeat Regular",
+  "Brume",
+  "Chunko Bold",
+  "Folkies Vantage",
+  "Might Night",
+  "Marble",
+  "Monigue",
+  "Oslla",
+  "RoseMask",
+  "Sink",
+  "Tallica",
 ];
 
 const getGradient = (id) => {
@@ -128,6 +190,25 @@ const getGradient = (id) => {
     "luxury-gold": "from-yellow-400 to-amber-600",
     "comic-book": "from-blue-400 to-yellow-400",
     "news-ticker": "from-blue-800 to-slate-900",
+    "pulse": "from-purple-500 to-pink-500",
+    "bubble-floral": "from-cyan-400 to-blue-500",
+    "falling-heart": "from-pink-500 to-rose-600",
+    "colorful": "from-red-500 via-yellow-500 to-green-500",
+    "ghost-star": "from-indigo-500 to-purple-600",
+    "tiktok-group": "from-pink-400 via-purple-400 to-indigo-400",
+    "matrix-rain": "from-green-500 to-emerald-900",
+    "electric-shock": "from-yellow-400 to-amber-600",
+    "smoke-trail": "from-gray-400 to-gray-700",
+    "pixel-glitch": "from-red-500 via-blue-500 to-green-500",
+    "neon-sign": "from-purple-500 to-pink-500",
+    "karaoke-classic": "from-yellow-300 to-orange-500",
+    "fade-in-out": "from-slate-300 to-slate-600",
+    "slide-up": "from-orange-400 to-red-500",
+    "zoom-burst": "from-pink-400 to-rose-600",
+    "bounce-in": "from-red-700 to-black",
+    "tiktok-yellow-box": "from-yellow-300 via-yellow-400 to-yellow-500",
+    "tiktok-box-group": "from-yellow-400 via-amber-400 to-orange-400",
+    "sakura-dream": "from-pink-300 via-pink-500 to-purple-600",
   };
   return palette[id] || "from-slate-700 to-slate-900";
 };
