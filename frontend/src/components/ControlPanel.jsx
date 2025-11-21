@@ -142,6 +142,12 @@ const presetStyleDefaults = {
   "tiktok-yellow-box": { primary_color: "#000000", outline_color: "#000000", font_size: 62, font: "Poppins" },
   "tiktok-box-group": { primary_color: "#FFFFFF", outline_color: "#000000", font_size: 58, font: "Poppins" },
   "sakura-dream": { primary_color: "#FF69B4", outline_color: "#FFFFFF", font_size: 68, font: "Brume" },
+  "phoenix-flames": { primary_color: "#FF0000", outline_color: "#FFFF00", font_size: 70, font: "Marble" },
+  "ice-crystal": { primary_color: "#FFFFFF", outline_color: "#DDFFFF", font_size: 66, font: "Monigue" },
+  "thunder-storm": { primary_color: "#FFFF00", outline_color: "#0000FF", font_size: 72, font: "Chunko Bold" },
+  "ocean-wave": { primary_color: "#0088FF", outline_color: "#FF8800", font_size: 64, font: "Oslla" },
+  "cosmic-stars": { primary_color: "#FF00FF", outline_color: "#FFFFFF", font_size: 68, font: "Tallica" },
+  "butterfly-dance": { primary_color: "#FF69B4", outline_color: "#00FF00", font_size: 66, font: "Folkies Vantage" },
 };
 
 const googleFonts = [
@@ -209,6 +215,12 @@ const getGradient = (id) => {
     "tiktok-yellow-box": "from-yellow-300 via-yellow-400 to-yellow-500",
     "tiktok-box-group": "from-yellow-400 via-amber-400 to-orange-400",
     "sakura-dream": "from-pink-300 via-pink-500 to-purple-600",
+    "phoenix-flames": "from-red-600 via-orange-500 to-yellow-400",
+    "ice-crystal": "from-cyan-200 via-blue-300 to-indigo-400",
+    "thunder-storm": "from-yellow-400 via-purple-600 to-gray-800",
+    "ocean-wave": "from-blue-400 via-cyan-500 to-teal-600",
+    "cosmic-stars": "from-purple-500 via-pink-500 to-indigo-600",
+    "butterfly-dance": "from-pink-400 via-purple-400 to-green-400",
   };
   return palette[id] || "from-slate-700 to-slate-900";
 };

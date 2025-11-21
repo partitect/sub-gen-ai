@@ -271,6 +271,48 @@ PRESET_STYLE_MAP = {
         "outline_color": "&H00FFFFFF",
         "font_size": 68,
         "id": "sakura-dream"
+    },
+    "phoenix-flames": {
+        "font": "Marble",
+        "primary_color": "&H0000FF",
+        "outline_color": "&H00FFFF00",
+        "font_size": 70,
+        "id": "phoenix-flames"
+    },
+    "ice-crystal": {
+        "font": "Monigue",
+        "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00DDFFFF",
+        "font_size": 66,
+        "id": "ice-crystal"
+    },
+    "thunder-storm": {
+        "font": "Chunko Bold",
+        "primary_color": "&H0000FFFF",
+        "outline_color": "&H000000FF",
+        "font_size": 72,
+        "id": "thunder-storm"
+    },
+    "ocean-wave": {
+        "font": "Oslla",
+        "primary_color": "&H00FF8800",
+        "outline_color": "&H000088FF",
+        "font_size": 64,
+        "id": "ocean-wave"
+    },
+    "cosmic-stars": {
+        "font": "Tallica",
+        "primary_color": "&H00FF00FF",
+        "outline_color": "&H00FFFFFF",
+        "font_size": 68,
+        "id": "cosmic-stars"
+    },
+    "butterfly-dance": {
+        "font": "Folkies Vantage",
+        "primary_color": "&H00FF69B4",
+        "outline_color": "&H0000FF00",
+        "font_size": 66,
+        "id": "butterfly-dance"
     }
 }
 

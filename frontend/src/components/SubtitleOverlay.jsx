@@ -299,6 +299,12 @@ export const stylePool = [
   { id: "tiktok-yellow-box", label: "📦 TikTok Yellow Box" },
   { id: "tiktok-box-group", label: "📦 TikTok Box Group" },
   { id: "sakura-dream", label: "🌸 Sakura Dream" },
+  { id: "phoenix-flames", label: "🔥 Phoenix Flames" },
+  { id: "ice-crystal", label: "❄️ Ice Crystal" },
+  { id: "thunder-storm", label: "⚡ Thunder Storm" },
+  { id: "ocean-wave", label: "🌊 Ocean Wave" },
+  { id: "cosmic-stars", label: "🌟 Cosmic Stars" },
+  { id: "butterfly-dance", label: "🦋 Butterfly Dance" },
 ];
 
 function getTheme(id) {
