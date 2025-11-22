@@ -96,6 +96,29 @@ export default function App() {
     }
   };
 
+  const handleLoadTestVideo = async () => {
+    setLoading(true);
+    try {
+      // Load dummy words
+      const response = await fetch('/test-video/test-data.json');
+      const data = await response.json();
+      setWords(data);
+
+      // Set video URL
+      setVideoUrl('/test-video/export_7ea10b8f2a224be0953d0792b13f7605.mp4');
+      setVideoFile(null); // Not a real file upload
+      setLanguage("en");
+      setModelName("test-mode");
+      setDevice("virtual");
+
+    } catch (error) {
+      console.error("Failed to load test video:", error);
+      alert("Failed to load test video data.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleExport = async () => {
     if (!videoFile || !words.length) return;
     const form = new FormData();
@@ -214,6 +237,17 @@ export default function App() {
               className="absolute inset-0 opacity-0 cursor-pointer"
             />
           </label>
+
+          <button
+            onClick={handleLoadTestVideo}
+            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600/80 to-pink-600/80 hover:from-purple-500/80 hover:to-pink-500/80 rounded-xl border border-white/10 hover:border-purple-400/50 transition-all duration-300 shadow-lg hover:shadow-purple-500/20 text-white"
+          >
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="text-sm font-medium">Test Video</span>
+          </button>
 
           <motion.button
             whileHover={{ scale: 1.05 }}
