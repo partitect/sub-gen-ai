@@ -25,36 +25,6 @@ class AdvancedRenderer:
     def __init__(self, words: List[Dict], style: Dict):
         self.words = words
         self.style = style
-        self.header = self._build_header()
-        
-    def _build_header(self) -> str:
-        font = (self.style.get("font") or "Inter").split(",")[0].strip()
-        primary = hex_to_ass(self.style.get("primary_color", "&H00FFFFFF"))
-        outline = hex_to_ass(self.style.get("outline_color", "&H00000000"))
-        font_size = self.style.get("font_size", 60)
-        
-        return f"""[Script Info]
-ScriptType: v4.00+
-PlayResX: 1920
-PlayResY: 1080
-
-[V4+ Styles]
-Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default, {font}, {font_size}, {primary}, &H000000FF, {outline}, &H00000000, -1, 0, 0, 0, 100, 100, 0, 0, 1, 2, 0, 5, 10, 10, 10, 1
-"""
-
-    def render(self) -> str:
-        preset_id = self.style.get("id", "word-pop")
-        method_name = f"render_{preset_id.replace('-', '_')}"
-        
-        if hasattr(self, method_name):
-            return getattr(self, method_name)()
-        else:
-            return self.render_word_pop() # Fallback
-
-    def _base_loop(self, effect_func):
-        lines = ["[Events]", "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"]
-        
         # Calculate position based on alignment
         # Alignment: 2 = Bottom, 8 = Top, 5 = Center
         alignment = int(self.style.get("alignment", 2))

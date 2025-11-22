@@ -1,154 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { stylePool } from "./SubtitleOverlay";
-
-const presetStyleDefaults = {
-  "fire-storm": {
-    primary_color: "#006DFF",
-    outline_color: "#000000",
-    font_size: 64,
-    font: "Brown Beige",
-  },
-  "cyber-glitch": {
-    primary_color: "#FFFFFF",
-    outline_color: "#0000FF",
-    font_size: 60,
-    font: "OverHeat Regular",
-  },
-  "neon-pulse": {
-    primary_color: "#7CFFFC",
-    outline_color: "#FF00FF",
-    font_size: 62,
-    font: "Thoge",
-  },
-  "kinetic-bounce": {
-    primary_color: "#FFFFFF",
-    outline_color: "#000000",
-    font_size: 64,
-    font: "Press Start 2P",
-  },
-  "cinematic-blur": {
-    primary_color: "#E0E0E0",
-    outline_color: "#000000",
-    font_size: 58,
-    font: "BlackCaps",
-  },
-  "thunder-strike": {
-    primary_color: "#FFFF00",
-    outline_color: "#000000",
-    font_size: 66,
-    font: "Komika Axis",
-  },
-  "typewriter-pro": {
-    primary_color: "#FFFFFF",
-    outline_color: "#000000",
-    font_size: 56,
-    font: "OverHeat Regular",
-  },
-  "rainbow-wave": {
-    primary_color: "#FFFFFF",
-    outline_color: "#000000",
-    font_size: 64,
-    font: "Brown Beige",
-  },
-  "earthquake-shake": {
-    primary_color: "#FF0000",
-    outline_color: "#FFFFFF",
-    font_size: 70,
-    font: "Thoge",
-  },
-  "word-pop": {
-    primary_color: "#FFFFFF",
-    outline_color: "#333333",
-    font_size: 60,
-    font: "Komika Axis",
-  },
-  "retro-arcade": {
-    primary_color: "#00FF00",
-    outline_color: "#000000",
-    font_size: 50,
-    font: "Press Start 2P",
-  },
-  "horror-creepy": {
-    primary_color: "#FF0000",
-    outline_color: "#330000",
-    font_size: 68,
-    font: "BlackCaps",
-  },
-  "luxury-gold": {
-    primary_color: "#FFD700",
-    outline_color: "#000000",
-    font_size: 60,
-    font: "Brown Beige",
-  },
-  "comic-book": {
-    primary_color: "#FFFFFF",
-    outline_color: "#000000",
-    font_size: 64,
-    font: "Komika Axis",
-  },
-  "news-ticker": {
-    primary_color: "#FFFFFF",
-    outline_color: "#000000",
-    font_size: 48,
-    font: "Thoge",
-  },
-  "pulse": {
-    primary_color: "#FFFFFF",
-    outline_color: "#FF00FF",
-    font_size: 62,
-    font: "Brown Beige",
-  },
-  "bubble-floral": {
-    primary_color: "#FFFFFF",
-    outline_color: "#FFBD00",
-    font_size: 58,
-    font: "Thoge",
-  },
-  "falling-heart": {
-    primary_color: "#000000",
-    outline_color: "#A5907E",
-    font_size: 64,
-    font: "OverHeat Regular",
-  },
-  "colorful": {
-    primary_color: "#FFFFFF",
-    outline_color: "#000000",
-    font_size: 60,
-    font: "Komika Axis",
-  },
-  "ghost-star": {
-    primary_color: "#FFFFFF",
-    outline_color: "#00FFFF",
-    font_size: 56,
-    font: "BlackCaps",
-  },
-  "tiktok-group": {
-    primary_color: "#FFFFFF",
-    outline_color: "#000000",
-    font_size: 58,
-    font: "Brown Beige",
-  },
-  "matrix-rain": { primary_color: "#00FF00", outline_color: "#000000", font_size: 54, font: "Monigue" },
-  "electric-shock": { primary_color: "#FFFF00", outline_color: "#000000", font_size: 66, font: "Chunko Bold" },
-  "smoke-trail": { primary_color: "#CCCCCC", outline_color: "#666666", font_size: 58, font: "Brume" },
-  "pixel-glitch": { primary_color: "#FFFFFF", outline_color: "#FF0000", font_size: 60, font: "Tallica" },
-  "neon-sign": { primary_color: "#FF00FF", outline_color: "#FF00FF", font_size: 64, font: "Oslla" },
-  "karaoke-classic": { primary_color: "#FFFFFF", outline_color: "#000000", font_size: 62, font: "Marble" },
-  "fade-in-out": { primary_color: "#FFFFFF", outline_color: "#333333", font_size: 56, font: "Folkies Vantage" },
-  "slide-up": { primary_color: "#FFAA00", outline_color: "#000000", font_size: 60, font: "Sink" },
-  "zoom-burst": { primary_color: "#FF69B4", outline_color: "#000000", font_size: 64, font: "RoseMask" },
-  "bounce-in": { primary_color: "#FFFFFF", outline_color: "#FF0000", font_size: 68, font: "Might Night" },
-  "tiktok-yellow-box": { primary_color: "#000000", outline_color: "#000000", font_size: 62, font: "Poppins" },
-  "tiktok-box-group": { primary_color: "#FFFFFF", outline_color: "#000000", font_size: 58, font: "Poppins" },
-  "sakura-dream": { primary_color: "#FF69B4", outline_color: "#FFFFFF", font_size: 68, font: "Brume" },
-  "phoenix-flames": { primary_color: "#FF0000", outline_color: "#FFFF00", font_size: 70, font: "Marble" },
-  "ice-crystal": { primary_color: "#FFFFFF", outline_color: "#DDFFFF", font_size: 66, font: "Monigue" },
-  "thunder-storm": { primary_color: "#FFFF00", outline_color: "#0000FF", font_size: 72, font: "Chunko Bold" },
-  "ocean-wave": { primary_color: "#0088FF", outline_color: "#FF8800", font_size: 64, font: "Oslla" },
-  "cosmic-stars": { primary_color: "#FF00FF", outline_color: "#FFFFFF", font_size: 68, font: "Tallica" },
-  "butterfly-dance": { primary_color: "#FF69B4", outline_color: "#00FF00", font_size: 66, font: "Folkies Vantage" },
-};
 
 const googleFonts = [
   "Inter",
@@ -250,7 +102,61 @@ export default function ControlPanel({
   onModelChange,
 }) {
   const [activeTab, setActiveTab] = useState("presets"); // presets | settings
+  const [presetStyleDefaults, setPresetStyleDefaults] = useState({});
+  const [presetList, setPresetList] = useState([]);
   const previewWords = useMemo(() => words.slice(0, 6), [words]);
+
+  // Load presets from backend
+  useEffect(() => {
+    const loadPresets = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/api/presets');
+        if (response.ok) {
+          const presets = await response.json();
+
+          // Create preset list for UI
+          const list = presets.map(preset => ({
+            id: preset.id,
+            label: formatLabel(preset.id)
+          }));
+          setPresetList(list);
+
+          // Convert array to object keyed by id for defaults
+          const presetsMap = {};
+          presets.forEach(preset => {
+            presetsMap[preset.id] = {
+              primary_color: parseColorToHex(preset.primary_color),
+              outline_color: parseColorToHex(preset.outline_color),
+              font_size: preset.font_size,
+              font: preset.font,
+              letter_spacing: preset.letter_spacing || 0,
+              bold: preset.bold,
+              italic: preset.italic,
+              border: preset.border || 2,
+              shadow: preset.shadow || 0,
+              blur: preset.blur || 0,
+              opacity: preset.opacity || 100,
+              rotation: preset.rotation || 0,
+              scale: preset.scale || 100,
+              alignment: preset.alignment || 2,
+              margin_v: preset.margin_v || 40,
+            };
+          });
+          setPresetStyleDefaults(presetsMap);
+        }
+      } catch (error) {
+        console.error('Failed to load presets:', error);
+      }
+    };
+    loadPresets();
+  }, []);
+
+  // Helper to format preset ID to readable label
+  const formatLabel = (id) => {
+    return id.split('-').map(word =>
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  };
 
   const handleStylePick = (id) => {
     const preset = presetStyleDefaults[id] || {};
@@ -302,7 +208,7 @@ export default function ControlPanel({
         {activeTab === "presets" && (
           /* Style Selector Tab */
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {stylePool.map((item) => {
+            {presetList.map((item) => {
               const isSelected = style.id === item.id;
               return (
                 <motion.button

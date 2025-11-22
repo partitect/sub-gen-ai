@@ -79,21 +79,35 @@ def get_existing_presets() -> Dict[str, Dict]:
     content = MAIN_PY_PATH.read_text(encoding='utf-8')
     
     # Find PRESET_STYLE_MAP
-    match = re.search(r'PRESET_STYLE_MAP\s*=\s*\{(.*?)\}', content, re.DOTALL)
+    match = re.search(r'PRESET_STYLE_MAP\s*=\s*\{(.*?)\n\}', content, re.DOTALL)
     if not match:
         return {}
     
     presets = {}
-    preset_blocks = re.findall(r'"([^"]+)":\s*\{([^}]+)\}', match.group(1))
+    preset_text = match.group(1)
     
-    for preset_id, preset_data in preset_blocks:
-        preset = {}
-        for line in preset_data.split('\n'):
-            if ':' in line:
-                key, value = line.split(':', 1)
-                key = key.strip().strip('"')
-                value = value.strip().strip(',').strip('"')
+    # Split by preset blocks (each starts with "preset-id": {)
+    preset_pattern = r'"([^"]+)":\s*\{([^}]+)\}'
+    
+    for match in re.finditer(preset_pattern, preset_text):
+        preset_id = match.group(1)
+        preset_content = match.group(2)
+        
+        preset = {'id': preset_id}
+        
+        # Parse each field
+        for line in preset_content.split('\n'):
+            line = line.strip()
+            if not line or line == ',':
+                continue
+            
+            # Match "key": "value" or "key": value
+            field_match = re.match(r'"([^"]+)":\s*"?([^",]+)"?,?', line)
+            if field_match:
+                key = field_match.group(1)
+                value = field_match.group(2).strip('"')
                 preset[key] = value
+        
         presets[preset_id] = preset
     
     return presets

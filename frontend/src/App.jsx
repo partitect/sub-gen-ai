@@ -6,6 +6,9 @@ import ControlPanel from "./components/ControlPanel";
 import { motion, AnimatePresence } from "framer-motion";
 import JSOOverlay from "./components/JSOOverlay";
 import LoadingOverlay from "./components/LoadingOverlay";
+import { Link } from "react-router-dom";
+import { Palette } from "lucide-react";
+
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000/api";
 
@@ -418,6 +421,15 @@ export default function App() {
       </AnimatePresence>
       {/* Magic Loading Overlay */}
       <LoadingOverlay isLoading={loading} />
+
+      {/* Floating Preset Editor Button */}
+      <Link
+        to="/preset-editor"
+        className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 transition-all hover:scale-105"
+      >
+        <Palette className="w-5 h-5" />
+        <span className="font-semibold">Preset Editor</span>
+      </Link>
     </div>
   );
 }

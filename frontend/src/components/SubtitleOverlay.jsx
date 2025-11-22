@@ -264,48 +264,35 @@ const styleThemes = {
 };
 
 // Available styles for the UI selector
-export const stylePool = [
-  { id: "word-pop", label: "Clean Pop" },
-  { id: "fire-storm", label: "Fire Storm" },
-  { id: "cyber-glitch", label: "Cyber Glitch" },
-  { id: "neon-pulse", label: "Neon Pulse" },
-  { id: "kinetic-bounce", label: "Kinetic Bounce" },
-  { id: "cinematic-blur", label: "Cinematic Blur" },
-  { id: "thunder-strike", label: "Thunder Strike" },
-  { id: "typewriter-pro", label: "Typewriter Pro" },
-  { id: "rainbow-wave", label: "Rainbow Wave" },
-  { id: "earthquake-shake", label: "Earthquake" },
-  { id: "retro-arcade", label: "Retro Arcade" },
-  { id: "horror-creepy", label: "Horror Creepy" },
-  { id: "luxury-gold", label: "Luxury Gold" },
-  { id: "comic-book", label: "Comic Book" },
-  { id: "news-ticker", label: "News Ticker" },
-  { id: "pulse", label: "⚡ Pulse" },
-  { id: "bubble-floral", label: "🫧 Bubble Floral" },
-  { id: "falling-heart", label: "💖 Falling Heart" },
-  { id: "colorful", label: "🌈 Colorful" },
-  { id: "ghost-star", label: "⭐ Ghost Star" },
-  { id: "tiktok-group", label: "📱 TikTok Group" },
-  { id: "matrix-rain", label: "💚 Matrix Rain" },
-  { id: "electric-shock", label: "⚡ Electric Shock" },
-  { id: "smoke-trail", label: "💨 Smoke Trail" },
-  { id: "pixel-glitch", label: "📺 Pixel Glitch" },
-  { id: "neon-sign", label: "💡 Neon Sign" },
-  { id: "karaoke-classic", label: "🎤 Karaoke Classic" },
-  { id: "fade-in-out", label: "🌫️ Fade In Out" },
-  { id: "slide-up", label: "⬆️ Slide Up" },
-  { id: "zoom-burst", label: "💥 Zoom Burst" },
-  { id: "bounce-in", label: "🎪 Bounce In" },
-  { id: "tiktok-yellow-box", label: "📦 TikTok Yellow Box" },
-  { id: "tiktok-box-group", label: "📦 TikTok Box Group" },
-  { id: "sakura-dream", label: "🌸 Sakura Dream" },
-  { id: "phoenix-flames", label: "🔥 Phoenix Flames" },
-  { id: "ice-crystal", label: "❄️ Ice Crystal" },
-  { id: "thunder-storm", label: "⚡ Thunder Storm" },
-  { id: "ocean-wave", label: "🌊 Ocean Wave" },
-  { id: "cosmic-stars", label: "🌟 Cosmic Stars" },
-  { id: "butterfly-dance", label: "🦋 Butterfly Dance" },
-];
+// Dynamic stylePool - will be populated from backend
+export let stylePool = [];
+
+// Load stylePool from backend
+export const loadStylePool = async () => {
+  try {
+    const response = await fetch('http://localhost:8000/api/presets');
+    if (response.ok) {
+      const presets = await response.json();
+      stylePool = presets.map(preset => ({
+        id: preset.id,
+        label: formatLabel(preset.id)
+      }));
+      return stylePool;
+    }
+  } catch (error) {
+    console.error('Failed to load style pool:', error);
+    return [];
+  }
+};
+
+// Helper to format preset ID to readable label
+const formatLabel = (id) => {
+  // Convert kebab-case to Title Case
+  const words = id.split('-').map(word =>
+    word.charAt(0).toUpperCase() + word.slice(1)
+  );
+  return words.join(' ');
+};
 
 function getTheme(id) {
   return styleThemes[id] || styleThemes["default"];

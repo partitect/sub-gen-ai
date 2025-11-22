@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -7,7 +8,7 @@ import uuid
 from pathlib import Path
 from typing import List, Optional
 
-from fastapi import FastAPI, File, Form, UploadFile, BackgroundTasks, HTTPException, Response
+from fastapi import FastAPI, File, Form, UploadFile, BackgroundTasks, HTTPException, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from faster_whisper import WhisperModel
@@ -44,15 +45,47 @@ PRESET_STYLE_MAP = {
     "cyber-glitch": {
         "font": "OverHeat Regular",
         "primary_color": "&H00FFFFFF",
-        "outline_color": "&H00FF0000",
-        "font_size": 60,
+        "secondary_color": "&H0000FFFF",
+        "outline_color": "&H000000FF",
+        "shadow_color": "&H00FFFFFF",
+        "font_size": 116,
+        "letter_spacing": 6,
+        "bold": 1,
+        "italic": 0,
+        "underline": 0,
+        "strikeout": 0,
+        "border": 2,
+        "shadow": 0,
+        "blur": 1,
+        "opacity": 100,
+        "rotation": 0,
+        "rotation_x": 0,
+        "rotation_y": 0,
+        "shear": 0,
+        "scale_x": 100,
+        "scale_y": 100,
+        "alignment": 2,
+        "margin_v": 40,
+        "margin_l": 10,
+        "margin_r": 10,
         "id": "cyber-glitch"
     },
     "neon-pulse": {
-        "font": "Thoge",
-        "primary_color": "&H00FFFC7C",
-        "outline_color": "&H00FF00FF",
-        "font_size": 62,
+        "font": "Brown Beige",
+        "primary_color": "&H00F5F5F5",
+        "outline_color": "&H00905190",
+        "font_size": 102,
+        "letter_spacing": 0,
+        "bold": 1,
+        "italic": 0,
+        "border": 2,
+        "shadow": 0,
+        "blur": 0,
+        "opacity": 100,
+        "rotation": 0,
+        "scale": 100,
+        "alignment": 2,
+        "margin_v": 40,
         "id": "neon-pulse"
     },
     "kinetic-bounce": {
@@ -175,12 +208,47 @@ PRESET_STYLE_MAP = {
         "id": "ghost-star"
     },
     "tiktok-group": {
-        "font": "Brown Beige",
+        "font": "Proxima Nova",
         "primary_color": "&H00FFFFFF",
         "outline_color": "&H00000000",
-        "font_size": 58,
+        "font_size": 54,
         "id": "tiktok-group"
     },
+    "3d-spin": {
+        "font": "Komika Axis",
+        "primary_color": "&H0000FFFF",
+        "secondary_color": "&H000000FF",
+        "outline_color": "&H00FFFFFF",
+        "shadow_color": "&H80000000",
+        "font_size": 70,
+        "rotation_y": 20,
+        "rotation_x": 10,
+        "shadow": 5,
+        "border": 3,
+        "id": "3d-spin"
+    },
+    "shear-force": {
+        "font": "Impact",
+        "primary_color": "&H0000FF00",
+        "outline_color": "&H00000000",
+        "font_size": 80,
+        "shear": -30,
+        "letter_spacing": 5,
+        "italic": 1,
+        "id": "shear-force"
+    },
+    "double-shadow": {
+        "font": "Poppins",
+        "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00FF00FF",
+        "shadow_color": "&H00FFFF00",
+        "font_size": 65,
+        "border": 4,
+        "shadow": 6,
+        "bold": 1,
+        "id": "double-shadow"
+    },
+
     "matrix-rain": {
         "font": "Monigue",
         "primary_color": "&H0000FF00",
@@ -309,10 +377,38 @@ PRESET_STYLE_MAP = {
     },
     "butterfly-dance": {
         "font": "Folkies Vantage",
-        "primary_color": "&H00FF69B4",
-        "outline_color": "&H0000FF00",
-        "font_size": 66,
+        "primary_color": "&H009A4C73",
+        "outline_color": "&H00FFFFFF",
+        "font_size": 120,
         "id": "butterfly-dance"
+    },
+    "welcome-my-life": {
+        "font": "MoolBoran",
+        "primary_color": "&H006CB1DD",
+        "secondary_color": "&H000000FF",
+        "outline_color": "&H00000000",
+        "shadow_color": "&H00000000",
+        "font_size": 47,
+        "letter_spacing": 0,
+        "bold": 0,
+        "italic": 0,
+        "underline": 0,
+        "strikeout": 0,
+        "border": 1.5,
+        "shadow": 0,
+        "blur": 0,
+        "opacity": 100,
+        "rotation": 0,
+        "rotation_x": 0,
+        "rotation_y": 0,
+        "shear": 0,
+        "scale_x": 100,
+        "scale_y": 100,
+        "alignment": 8,
+        "margin_v": 47,
+        "margin_l": 13,
+        "margin_r": 13,
+        "id": "welcome-my-life"
     }
 }
 
@@ -634,6 +730,361 @@ async def preview_ass(
         print(f"Preview Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@app.get("/api/presets")
+async def get_presets():
+    """
+    Returns all available presets with their configuration.
+    """
+    try:
+        presets_list = []
+        for preset_id, preset_data in PRESET_STYLE_MAP.items():
+            presets_list.append(preset_data)
+        return JSONResponse(content=presets_list)
+    except Exception as e:
+        print(f"Get Presets Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/presets/update")
+async def update_preset(preset_data: dict):
+    """
+    Updates a preset configuration and persists to main.py
+    """
+    try:
+        preset_id = preset_data.get("id")
+        if not preset_id or preset_id not in PRESET_STYLE_MAP:
+            raise HTTPException(status_code=404, detail="Preset not found")
+        
+        # Update in-memory preset
+        PRESET_STYLE_MAP[preset_id] = preset_data
+        
+        # Persist to file
+        try:
+            update_main_py_preset(preset_id, preset_data)
+            message = f"Preset '{preset_id}' updated and saved to main.py"
+        except Exception as e:
+            message = f"Preset '{preset_id}' updated in memory, but failed to save to file: {str(e)}"
+        
+        return JSONResponse(content={
+            "success": True,
+            "message": message
+        })
+    except Exception as e:
+        print(f"Update Preset Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/presets/create")
+async def create_preset(preset_data: dict):
+    """
+    Creates a new preset (Save As functionality)
+    """
+    try:
+        preset_id = preset_data.get("id")
+        if not preset_id:
+            raise HTTPException(status_code=400, detail="Preset ID is required")
+        
+        if preset_id in PRESET_STYLE_MAP:
+            raise HTTPException(status_code=409, detail=f"Preset '{preset_id}' already exists")
+        
+        # Add to in-memory map
+        PRESET_STYLE_MAP[preset_id] = preset_data
+        
+        # Persist to file
+        try:
+            add_preset_to_main_py(preset_id, preset_data)
+            message = f"Preset '{preset_id}' created and saved to main.py"
+        except Exception as e:
+            message = f"Preset '{preset_id}' created in memory, but failed to save to file: {str(e)}"
+        
+        return JSONResponse(content={
+            "success": True,
+            "message": message
+        })
+    except Exception as e:
+        print(f"Create Preset Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+def update_main_py_preset(preset_id: str, preset_data: dict):
+    """Update a preset in main.py file"""
+    main_py_path = Path(__file__).resolve()
+    content = main_py_path.read_text(encoding='utf-8')
+    
+    # Find the preset block
+    pattern = rf'"{preset_id}":\s*\{{[^}}]+\}}'
+    
+    # Create new preset block with all parameters
+    new_preset = f'''"{preset_id}": {{
+        "font": "{preset_data.get('font', 'Poppins')}",
+        "primary_color": "{preset_data.get('primary_color', '&H00FFFFFF')}",
+        "secondary_color": "{preset_data.get('secondary_color', '&H0000FFFF')}",
+        "outline_color": "{preset_data.get('outline_color', '&H00000000')}",
+        "shadow_color": "{preset_data.get('shadow_color', '&H00000000')}",
+        "font_size": {preset_data.get('font_size', 64)},
+        "letter_spacing": {preset_data.get('letter_spacing', 0)},
+        "bold": {preset_data.get('bold', 1)},
+        "italic": {preset_data.get('italic', 0)},
+        "underline": {preset_data.get('underline', 0)},
+        "strikeout": {preset_data.get('strikeout', 0)},
+        "border": {preset_data.get('border', 2)},
+        "shadow": {preset_data.get('shadow', 0)},
+        "blur": {preset_data.get('blur', 0)},
+        "opacity": {preset_data.get('opacity', 100)},
+        "rotation": {preset_data.get('rotation', 0)},
+        "rotation_x": {preset_data.get('rotation_x', 0)},
+        "rotation_y": {preset_data.get('rotation_y', 0)},
+        "shear": {preset_data.get('shear', 0)},
+        "scale_x": {preset_data.get('scale_x', 100)},
+        "scale_y": {preset_data.get('scale_y', 100)},
+        "alignment": {preset_data.get('alignment', 2)},
+        "margin_v": {preset_data.get('margin_v', 40)},
+        "margin_l": {preset_data.get('margin_l', 10)},
+        "margin_r": {preset_data.get('margin_r', 10)},
+        "id": "{preset_id}"
+    }}'''
+    
+    # Replace
+    updated_content = re.sub(pattern, new_preset, content, flags=re.DOTALL)
+    
+    # Write back
+    main_py_path.write_text(updated_content, encoding='utf-8')
+
+
+def add_preset_to_main_py(preset_id: str, preset_data: dict):
+    """Add a new preset to main.py file"""
+    main_py_path = Path(__file__).resolve()
+    content = main_py_path.read_text(encoding='utf-8')
+    
+    # Find the end of PRESET_STYLE_MAP
+    pattern = r'(PRESET_STYLE_MAP\s*=\s*\{.*?)(\n\})'
+    
+    # Create new preset block with all parameters
+    new_preset = f''',
+    "{preset_id}": {{
+        "font": "{preset_data.get('font', 'Poppins')}",
+        "primary_color": "{preset_data.get('primary_color', '&H00FFFFFF')}",
+        "secondary_color": "{preset_data.get('secondary_color', '&H0000FFFF')}",
+        "outline_color": "{preset_data.get('outline_color', '&H00000000')}",
+        "shadow_color": "{preset_data.get('shadow_color', '&H00000000')}",
+        "font_size": {preset_data.get('font_size', 64)},
+        "letter_spacing": {preset_data.get('letter_spacing', 0)},
+        "bold": {preset_data.get('bold', 1)},
+        "italic": {preset_data.get('italic', 0)},
+        "underline": {preset_data.get('underline', 0)},
+        "strikeout": {preset_data.get('strikeout', 0)},
+        "border": {preset_data.get('border', 2)},
+        "shadow": {preset_data.get('shadow', 0)},
+        "blur": {preset_data.get('blur', 0)},
+        "opacity": {preset_data.get('opacity', 100)},
+        "rotation": {preset_data.get('rotation', 0)},
+        "rotation_x": {preset_data.get('rotation_x', 0)},
+        "rotation_y": {preset_data.get('rotation_y', 0)},
+        "shear": {preset_data.get('shear', 0)},
+        "scale_x": {preset_data.get('scale_x', 100)},
+        "scale_y": {preset_data.get('scale_y', 100)},
+        "alignment": {preset_data.get('alignment', 2)},
+        "margin_v": {preset_data.get('margin_v', 40)},
+        "margin_l": {preset_data.get('margin_l', 10)},
+        "margin_r": {preset_data.get('margin_r', 10)},
+        "id": "{preset_id}"
+    }}'''
+    
+    # Insert before closing brace
+    updated_content = re.sub(pattern, rf'\1{new_preset}\2', content, flags=re.DOTALL)
+    
+    # Write back
+    main_py_path.write_text(updated_content, encoding='utf-8')
+
+
+@app.get("/api/aaspresets/list")
+async def list_aaspresets():
+    """
+    List all available AASPresets
+    """
+    try:
+        aaspresets_dir = Path(__file__).resolve().parent.parent / "aaspresets"
+        if not aaspresets_dir.exists():
+            return JSONResponse(content=[])
+        
+        presets = []
+        for ass_file in aaspresets_dir.rglob("*.ass"):
+            relative_path = str(ass_file.relative_to(aaspresets_dir))
+            presets.append({
+                "name": ass_file.stem,
+                "path": relative_path,
+                "full_path": str(ass_file)
+            })
+        
+        return JSONResponse(content=sorted(presets, key=lambda x: x['name']))
+    except Exception as e:
+        print(f"List AASPresets Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/aaspresets/extract-style")
+async def extract_aas_style(request: Request):
+    """
+    Extract style from an AAS file and convert to PyCaps preset format
+    """
+    try:
+        data = await request.json()
+        file_path = data.get("path")
+        
+        if not file_path:
+            raise HTTPException(status_code=400, detail="File path is required")
+            
+        # Construct full path
+        aaspresets_dir = Path(__file__).resolve().parent.parent / "aaspresets"
+        full_path = aaspresets_dir / file_path
+        
+        if not full_path.exists():
+            raise HTTPException(status_code=404, detail="File not found")
+            
+        content = full_path.read_text(encoding='utf-8')
+        
+        # Parse ASS content
+        style_section = re.search(r'\[V4\+ Styles\](.*?)(?:\[|$)', content, re.DOTALL)
+        if not style_section:
+            raise HTTPException(status_code=400, detail="No [V4+ Styles] section found")
+            
+        section_content = style_section.group(1)
+        
+        # Get format line
+        format_match = re.search(r'Format:\s*(.*)', section_content)
+        if not format_match:
+            raise HTTPException(status_code=400, detail="No Format line found")
+            
+        format_cols = [c.strip() for c in format_match.group(1).split(',')]
+        
+        # Get first style line (assuming we want the first style found, usually Default or specific)
+        # We look for a Style: line that is NOT Default if possible, or just the first one
+        style_matches = list(re.finditer(r'Style:\s*(.*)', section_content))
+        
+        if not style_matches:
+            raise HTTPException(status_code=400, detail="No Style definitions found")
+            
+        # Prefer non-Default style if available, otherwise take the last one (often the most specific)
+        target_style_line = style_matches[-1].group(1)
+        style_values = [v.strip() for v in target_style_line.split(',')]
+        
+        # Map columns to values
+        style_map = {}
+        if len(format_cols) == len(style_values):
+            style_map = dict(zip(format_cols, style_values))
+        else:
+            # Handle potential mismatch if commas in font name etc (basic handling)
+            # For now assume standard ASS format
+            style_map = dict(zip(format_cols, style_values[:len(format_cols)]))
+            
+        # Convert to PyCaps preset format
+        preset = {
+            "font": style_map.get("Fontname", "Arial"),
+            "font_size": float(style_map.get("Fontsize", 64)),
+            "primary_color": style_map.get("PrimaryColour", "&H00FFFFFF"),
+            "secondary_color": style_map.get("SecondaryColour", "&H0000FFFF"),
+            "outline_color": style_map.get("OutlineColour", "&H00000000"),
+            "shadow_color": style_map.get("BackColour", "&H00000000"),
+            "bold": 1 if style_map.get("Bold") == "-1" or style_map.get("Bold") == "1" else 0,
+            "italic": 1 if style_map.get("Italic") == "-1" or style_map.get("Italic") == "1" else 0,
+            "underline": -1 if style_map.get("Underline") == "-1" or style_map.get("Underline") == "1" else 0,
+            "strikeout": -1 if style_map.get("StrikeOut") == "-1" or style_map.get("StrikeOut") == "1" else 0,
+            "scale_x": float(style_map.get("ScaleX", 100)),
+            "scale_y": float(style_map.get("ScaleY", 100)),
+            "letter_spacing": float(style_map.get("Spacing", 0)),
+            "rotation": float(style_map.get("Angle", 0)),
+            "border": float(style_map.get("Outline", 2)),
+            "shadow": float(style_map.get("Shadow", 0)),
+            "alignment": int(style_map.get("Alignment", 2)),
+            "margin_l": int(style_map.get("MarginL", 10)),
+            "margin_r": int(style_map.get("MarginR", 10)),
+            "margin_v": int(style_map.get("MarginV", 10)),
+            # Default values for properties not in standard ASS Style but supported by PyCaps
+            "blur": 0,
+            "rotation_x": 0,
+            "rotation_y": 0,
+            "shear": 0
+        }
+        
+        return JSONResponse(content=preset)
+        
+    except Exception as e:
+        print(f"Extract Style Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+import base64
+
+@app.delete("/api/presets/{preset_id}")
+async def delete_preset(preset_id: str):
+    """
+    Delete a preset from main.py
+    """
+    try:
+        main_py_path = Path(__file__).resolve()
+        content = main_py_path.read_text(encoding='utf-8')
+        
+        # Regex to find the preset block
+        # Matches "preset_id": { ... }
+        # We need to be careful to match the correct block including nested braces
+        # A simple regex might fail if there are nested braces, but our presets are simple dicts
+        # We'll assume standard formatting as generated by this script
+        
+        # Pattern: "preset_id":\s*\{[^}]+\},?
+        pattern = rf'"{re.escape(preset_id)}":\s*\{{[^}}]+\}},?\s*'
+        
+        if not re.search(pattern, content):
+            raise HTTPException(status_code=404, detail="Preset not found")
+            
+        # Remove the preset
+        updated_content = re.sub(pattern, '', content)
+        
+        # Clean up potential double commas or trailing commas if needed
+        # (Simple cleanup, might need more robust parsing if file is messy)
+        
+        main_py_path.write_text(updated_content, encoding='utf-8')
+        
+        return {"message": f"Preset {preset_id} deleted successfully"}
+        
+    except Exception as e:
+        print(f"Delete Preset Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/presets/screenshot")
+async def save_preset_screenshot(request: Request):
+    """
+    Save a screenshot of the preset preview
+    """
+    try:
+        data = await request.json()
+        preset_id = data.get("id")
+        image_data = data.get("image")
+        
+        if not preset_id or not image_data:
+            raise HTTPException(status_code=400, detail="ID and image data required")
+            
+        # Remove header if present (data:image/png;base64,...)
+        if "base64," in image_data:
+            image_data = image_data.split("base64,")[1]
+            
+        # Decode image
+        image_bytes = base64.b64decode(image_data)
+        
+        # Define path: frontend/public/presets-image
+        # Assuming backend is in backend/ and frontend is in frontend/
+        frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
+        images_dir = frontend_dir / "public" / "presets-image"
+        images_dir.mkdir(parents=True, exist_ok=True)
+        
+        file_path = images_dir / f"{preset_id}.png"
+        
+        file_path.write_bytes(image_bytes)
+        
+        return {"message": f"Screenshot saved to {file_path}", "path": f"/presets-image/{preset_id}.png"}
+        
+    except Exception as e:
+        print(f"Screenshot Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)
