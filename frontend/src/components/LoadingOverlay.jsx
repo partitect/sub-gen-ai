@@ -22,8 +22,8 @@ export default function LoadingOverlay({ isLoading }) {
     useEffect(() => {
         const fetchLottie = async () => {
             try {
-                // Using a reliable public Lottie URL (Rocket/Space theme)
-                const response = await fetch("https://assets9.lottiefiles.com/packages/lf20_x62chJ.json");
+                // Using local Lottie file from public folder
+                const response = await fetch("/Sandy Loading.json");
                 if (!response.ok) throw new Error("Failed to load lottie");
                 const data = await response.json();
                 setAnimationData(data);

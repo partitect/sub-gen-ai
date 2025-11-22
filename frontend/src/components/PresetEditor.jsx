@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Palette, Type, Sliders, Save, Eye, Download, Upload, ArrowLeft, Trash2, Camera } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import html2canvas from 'html2canvas';
+import LoadingOverlay from './LoadingOverlay';
 
 const PresetEditor = () => {
     const [presets, setPresets] = useState([]);
@@ -13,6 +14,7 @@ const PresetEditor = () => {
     const [previewBackground, setPreviewBackground] = useState('gradient'); // 'gradient', 'white', 'black', 'image'
     const [aasPresets, setAasPresets] = useState([]);
     const [showImportModal, setShowImportModal] = useState(false);
+    const [activeTab, setActiveTab] = useState('presets'); // 'presets' | 'edit'
 
     // Available fonts
     const availableFonts = [
@@ -91,6 +93,7 @@ const PresetEditor = () => {
                     await fetchPresets();
                     setEditedPreset(newPreset);
                     setSelectedPreset(newPreset);
+                    setActiveTab('edit');
                     alert('Imported as new preset!');
                 } catch (e) {
                     console.error(e);
@@ -124,6 +127,7 @@ const PresetEditor = () => {
             setEditedPreset(null);
             setSelectedPreset(null);
             fetchPresets();
+            setActiveTab('presets');
         } catch (error) {
             console.error('Delete failed:', error);
             alert('Failed to delete preset');
@@ -159,6 +163,7 @@ const PresetEditor = () => {
     const handlePresetSelect = (preset) => {
         setSelectedPreset(preset);
         setEditedPreset({ ...preset });
+        setActiveTab('edit');
     };
 
     const handleColorChange = (field, value) => {
@@ -204,6 +209,7 @@ const PresetEditor = () => {
             fetchPresets();
             setSelectedPreset(newPreset);
             setEditedPreset(newPreset);
+            setActiveTab('edit');
         } catch (error) {
             console.error('Failed to create preset:', error);
             alert('Failed to create preset');
@@ -231,118 +237,103 @@ const PresetEditor = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center">
-                <div className="text-white text-2xl">Loading presets...</div>
+            <div className="min-h-screen bg-gray-900">
+                <LoadingOverlay isLoading={true} />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white">
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white overflow-hidden">
             {/* Header */}
-            <div className="bg-black/30 backdrop-blur-md border-b border-white/10 p-6">
-                <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="bg-black/30 backdrop-blur-md border-b border-white/10 p-4 h-[80px] flex items-center">
+                <div className="max-w-[1600px] mx-auto w-full flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Link to="/" className="p-2 hover:bg-white/10 rounded-lg transition">
                             <ArrowLeft className="w-6 h-6" />
                         </Link>
                         <Palette className="w-8 h-8 text-purple-400" />
-                        <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                        <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                             Preset Editor
                         </h1>
                     </div>
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto p-6">
-                <div className="grid grid-cols-12 gap-6">
-                    {/* Left Sidebar - Preset List */}
-                    <div className="col-span-3">
-                        <div className="bg-black/40 backdrop-blur-md rounded-xl border border-white/10 p-4">
-                            <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-xl font-bold flex items-center gap-2">
-                                    <Type className="w-5 h-5" />
-                                    Presets ({presets.length})
-                                </h2>
-                                <button
-                                    onClick={() => {
-                                        fetchAASPresetList();
-                                        setShowImportModal(true);
-                                    }}
-                                    className="p-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition"
-                                    title="Import New Style"
-                                >
-                                    <Upload className="w-4 h-4" />
-                                </button>
-                            </div>
-                            <div className="space-y-2 max-h-[calc(100vh-250px)] overflow-y-auto custom-scrollbar">
-                                {presets.map((preset) => (
-                                    <motion.button
-                                        key={preset.id}
-                                        onClick={() => handlePresetSelect(preset)}
-                                        className={`w-full text-left p-3 rounded-lg transition ${selectedPreset?.id === preset.id
-                                            ? 'bg-purple-600 text-white'
-                                            : 'bg-white/5 hover:bg-white/10'
-                                            }`}
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}
-                                    >
-                                        <div className="font-semibold">{preset.id}</div>
-                                        <div className="text-xs opacity-70">{preset.font} • {preset.font_size}px</div>
-                                    </motion.button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
+            <div className="max-w-[1600px] mx-auto p-6 h-[calc(100vh-80px)]">
+                <div className="grid grid-cols-12 gap-6 h-full pb-6">
 
-                    {/* Middle - Editor */}
-                    <div className="col-span-5">
-                        {editedPreset ? (
-                            <div className="bg-black/40 backdrop-blur-md rounded-xl border border-white/10 p-6">
-                                <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-2xl font-bold flex items-center gap-2">
-                                        <Sliders className="w-6 h-6" />
-                                        Edit: {editedPreset.id}
-                                    </h2>
-                                    <div className="flex gap-2">
+
+                    {/* Right Sidebar - Presets & Edit Tabs */}
+                    <div className="col-span-8 flex flex-col bg-black/40 backdrop-blur-md rounded-xl border border-white/10 overflow-hidden h-full">
+                        {/* Tab Header */}
+                        <div className="flex border-b border-white/10 shrink-0">
+                            <button
+                                onClick={() => setActiveTab('presets')}
+                                className={`flex-1 py-4 text-sm font-bold transition flex items-center justify-center gap-2 ${activeTab === 'presets' ? 'bg-purple-600/20 text-purple-400 border-b-2 border-purple-500' : 'hover:bg-white/5 text-white/60'}`}
+                            >
+                                <Type className="w-4 h-4" />
+                                Presets
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('edit')}
+                                className={`flex-1 py-4 text-sm font-bold transition flex items-center justify-center gap-2 ${activeTab === 'edit' ? 'bg-purple-600/20 text-purple-400 border-b-2 border-purple-500' : 'hover:bg-white/5 text-white/60'}`}
+                            >
+                                <Sliders className="w-4 h-4" />
+                                Edit
+                            </button>
+                        </div>
+
+                        {/* Tab Content */}
+                        <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
+                            {activeTab === 'presets' ? (
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h2 className="text-xs font-bold text-white/50 uppercase tracking-wider">Library ({presets.length})</h2>
                                         <button
                                             onClick={() => {
                                                 fetchAASPresetList();
                                                 setShowImportModal(true);
                                             }}
-                                            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg flex items-center gap-2 transition"
-                                            title="Import Style"
+                                            className="p-1.5 bg-purple-600 hover:bg-purple-700 rounded-lg transition"
+                                            title="Import New Style"
                                         >
-                                            <Upload className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={handleSaveAs}
-                                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-2 transition"
-                                            title="Save As New"
-                                        >
-                                            <Save className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={handleSave}
-                                            className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg flex items-center gap-2 transition"
-                                            title="Save Changes"
-                                        >
-                                            <Save className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={handleDelete}
-                                            className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg flex items-center gap-2 transition"
-                                            title="Delete Preset"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
+                                            <Upload className="w-3 h-3" />
                                         </button>
                                     </div>
+                                    {presets.map((preset) => (
+                                        <motion.button
+                                            key={preset.id}
+                                            onClick={() => handlePresetSelect(preset)}
+                                            className={`w-full text-left p-3 rounded-lg transition border border-transparent ${selectedPreset?.id === preset.id
+                                                ? 'bg-purple-600/20 border-purple-500/50 text-white shadow-lg shadow-purple-900/20'
+                                                : 'bg-white/5 hover:bg-white/10'
+                                                }`}
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                        >
+                                            <div className="font-semibold text-sm">{preset.id}</div>
+                                            <div className="text-xs opacity-50 mt-1">{preset.font} • {preset.font_size}px</div>
+                                        </motion.button>
+                                    ))}
                                 </div>
-
-                                {/* Scrollable Controls */}
-                                <div className="max-h-[calc(100vh-250px)] overflow-y-auto custom-scrollbar pr-2">
-
+                            ) : (
+                                /* Edit Tab Content */
+                                editedPreset ? (
                                     <div className="space-y-6">
+                                        {/* Toolbar */}
+                                        <div className="flex gap-2 mb-4 sticky top-0 bg-gray-900/90 backdrop-blur z-10 py-2 border-b border-white/10 -mx-4 px-4">
+                                            <button onClick={handleSave} className="flex-1 py-2 bg-green-600 hover:bg-green-700 rounded-lg flex items-center justify-center gap-2 transition text-xs font-bold" title="Save">
+                                                <Save className="w-3 h-3" /> Save
+                                            </button>
+                                            <button onClick={handleSaveAs} className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center justify-center gap-2 transition text-xs font-bold" title="Save As">
+                                                <Save className="w-3 h-3" /> Save As
+                                            </button>
+                                            <button onClick={handleDelete} className="p-2 bg-red-600 hover:bg-red-700 rounded-lg transition" title="Delete">
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+
                                         {/* === TYPOGRAPHY === */}
                                         <div className="border-b border-white/10 pb-4">
                                             <h3 className="text-sm font-bold text-purple-400 mb-3 uppercase tracking-wide">Typography</h3>
@@ -697,42 +688,36 @@ const PresetEditor = () => {
                                             />
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="bg-black/40 backdrop-blur-md rounded-xl border border-white/10 p-12 text-center">
-                                <Eye className="w-16 h-16 mx-auto mb-4 text-white/30" />
-                                <p className="text-xl text-white/50 mb-6">Select a preset to edit</p>
-                                <button
-                                    onClick={() => {
-                                        fetchAASPresetList();
-                                        setShowImportModal(true);
-                                    }}
-                                    className="px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg inline-flex items-center gap-2 transition font-semibold"
-                                >
-                                    <Upload className="w-5 h-5" />
-                                    Import New Style
-                                </button>
-                            </div>
-                        )}
+                                ) : (
+                                    <div className="text-center py-12 text-white/40 flex flex-col items-center">
+                                        <Sliders className="w-12 h-12 mb-4 opacity-20" />
+                                        <p className="text-sm">Select a preset to start editing</p>
+                                        <button
+                                            onClick={() => setActiveTab('presets')}
+                                            className="mt-4 text-purple-400 hover:text-purple-300 text-xs font-bold uppercase tracking-wide border border-purple-500/30 px-4 py-2 rounded-lg hover:bg-purple-500/10 transition"
+                                        >
+                                            Go to Presets
+                                        </button>
+                                    </div>
+                                )
+                            )}
+                        </div>
                     </div>
-
-                    {/* Right - Live Preview */}
-                    <div className="col-span-4">
-                        <div className="bg-black/40 backdrop-blur-md rounded-xl border border-white/10 p-6 sticky top-6">
-                            <div className="flex items-center justify-between mb-4">
+                    {/* Left Preview (9 cols) */}
+                    <div className="col-span-4 flex flex-col h-full">
+                        <div className="bg-black/40 backdrop-blur-md rounded-xl border border-white/10 p-6 flex-1 flex flex-col relative overflow-hidden">
+                            {/* Preview Header */}
+                            <div className="flex items-center justify-between mb-4 z-10 relative shrink-0">
                                 <h2 className="text-xl font-bold flex items-center gap-2">
-                                    <Eye className="w-5 h-5" />
+                                    <Eye className="w-5 h-5 text-purple-400" />
                                     Live Preview
                                 </h2>
-
-                                {/* Background Selector */}
-                                <div className="flex gap-1 bg-black/40 rounded-lg p-1">
+                                <div className="flex gap-1 bg-black/60 backdrop-blur rounded-lg p-1 border border-white/10">
                                     <button
                                         onClick={() => setPreviewBackground('gradient')}
                                         className={`px-3 py-1 rounded text-xs transition ${previewBackground === 'gradient'
-                                                ? 'bg-purple-600 text-white'
-                                                : 'text-white/60 hover:text-white'
+                                            ? 'bg-purple-600 text-white'
+                                            : 'text-white/60 hover:text-white'
                                             }`}
                                         title="Gradient Background"
                                     >
@@ -741,8 +726,8 @@ const PresetEditor = () => {
                                     <button
                                         onClick={() => setPreviewBackground('white')}
                                         className={`px-3 py-1 rounded text-xs transition ${previewBackground === 'white'
-                                                ? 'bg-purple-600 text-white'
-                                                : 'text-white/60 hover:text-white'
+                                            ? 'bg-purple-600 text-white'
+                                            : 'text-white/60 hover:text-white'
                                             }`}
                                         title="White Background"
                                     >
@@ -751,18 +736,28 @@ const PresetEditor = () => {
                                     <button
                                         onClick={() => setPreviewBackground('black')}
                                         className={`px-3 py-1 rounded text-xs transition ${previewBackground === 'black'
-                                                ? 'bg-purple-600 text-white'
-                                                : 'text-white/60 hover:text-white'
+                                            ? 'bg-purple-600 text-white'
+                                            : 'text-white/60 hover:text-white'
                                             }`}
                                         title="Black Background"
                                     >
                                         ⚫
                                     </button>
                                     <button
+                                        onClick={() => setPreviewBackground('green')}
+                                        className={`px-3 py-1 rounded text-xs transition ${previewBackground === 'green'
+                                            ? 'bg-purple-600 text-white'
+                                            : 'text-white/60 hover:text-white'
+                                            }`}
+                                        title="Green Screen"
+                                    >
+                                        🟩
+                                    </button>
+                                    <button
                                         onClick={() => setPreviewBackground('image')}
                                         className={`px-3 py-1 rounded text-xs transition ${previewBackground === 'image'
-                                                ? 'bg-purple-600 text-white'
-                                                : 'text-white/60 hover:text-white'
+                                            ? 'bg-purple-600 text-white'
+                                            : 'text-white/60 hover:text-white'
                                             }`}
                                         title="Video Background"
                                     >
@@ -778,105 +773,95 @@ const PresetEditor = () => {
                                 </div>
                             </div>
 
-                            {editedPreset ? (
-                                <div id="preview-container" className="rounded-lg flex items-center justify-center relative overflow-hidden mx-auto" style={{ aspectRatio: '9/16', maxHeight: '600px', width: 'auto' }}>
-                                    {/* Dynamic Background */}
-                                    {previewBackground === 'gradient' && (
-                                        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-pink-900/20 bg-black" />
-                                    )}
-                                    {previewBackground === 'white' && (
-                                        <div className="absolute inset-0 bg-white" />
-                                    )}
-                                    {previewBackground === 'black' && (
-                                        <div className="absolute inset-0 bg-black" />
-                                    )}
-                                    {previewBackground === 'image' && (
-                                        <div className="absolute inset-0">
-                                            <img
-                                                src="/bg-captions.png"
-                                                alt="Background"
-                                                className="w-full h-full object-cover"
-                                            />
+                            {/* Preview Area */}
+                            <div className="flex-1 flex items-center justify-center relative min-h-0">
+                                {editedPreset ? (
+                                    <div id="preview-container" className="rounded-lg flex items-center justify-center relative overflow-hidden shadow-2xl" style={{ aspectRatio: '9/16', height: '100%', maxHeight: '100%', width: 'auto' }}>
+                                        {/* Dynamic Background */}
+                                        {previewBackground === 'gradient' && (
+                                            <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-pink-900/20 bg-black" />
+                                        )}
+                                        {previewBackground === 'white' && (
+                                            <div className="absolute inset-0 bg-white" />
+                                        )}
+                                        {previewBackground === 'black' && (
+                                            <div className="absolute inset-0 bg-black" />
+                                        )}
+                                        {previewBackground === 'green' && (
+                                            <div className="absolute inset-0 bg-[#00FF00]" />
+                                        )}
+                                        {previewBackground === 'image' && (
+                                            <div className="absolute inset-0">
+                                                <img
+                                                    src="/bg-captions.png"
+                                                    alt="Background"
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                        )}
+
+                                        {/* Preview Text */}
+                                        <div
+                                            className="relative z-10 text-center px-8"
+                                            style={{
+                                                fontFamily: editedPreset.font,
+                                                fontSize: `${Math.min(parseInt(editedPreset.font_size) * 0.4, 48)}px`,
+                                                color: assToHex(editedPreset.primary_color),
+                                                letterSpacing: `${(editedPreset.letter_spacing || 0) * 0.4}px`,
+                                                fontWeight: editedPreset.bold === 1 ? 'bold' : 'normal',
+                                                fontStyle: editedPreset.italic === 1 ? 'italic' : 'normal',
+                                                textDecoration: `${editedPreset.underline === -1 ? 'underline' : ''} ${editedPreset.strikeout === -1 ? 'line-through' : ''}`.trim(),
+                                                opacity: (editedPreset.opacity || 100) / 100,
+                                                transform: `
+                                                    rotateX(${editedPreset.rotation_x || 0}deg) 
+                                                    rotateY(${editedPreset.rotation_y || 0}deg) 
+                                                    rotateZ(${editedPreset.rotation || 0}deg) 
+                                                    skewX(${editedPreset.shear || 0}deg) 
+                                                    scale(${(editedPreset.scale_x || 100) / 100}, ${(editedPreset.scale_y || 100) / 100})
+                                                `,
+                                                filter: `blur(${(editedPreset.blur || 0) * 0.5}px)`,
+                                                textShadow: `
+                                                    ${editedPreset.border || 2}px ${editedPreset.border || 2}px 0 ${assToHex(editedPreset.outline_color)},
+                                                    -${editedPreset.border || 2}px -${editedPreset.border || 2}px 0 ${assToHex(editedPreset.outline_color)},
+                                                    ${editedPreset.border || 2}px -${editedPreset.border || 2}px 0 ${assToHex(editedPreset.outline_color)},
+                                                    -${editedPreset.border || 2}px ${editedPreset.border || 2}px 0 ${assToHex(editedPreset.outline_color)}
+                                                    ${editedPreset.shadow > 0 ? `, ${editedPreset.shadow * 2}px ${editedPreset.shadow * 2}px ${editedPreset.shadow * 3}px ${assToHex(editedPreset.shadow_color || '&H00000000')}` : ''}
+                                                `,
+                                                lineHeight: 1.4
+                                            }}
+                                        >
+                                            {previewText}
                                         </div>
-                                    )}
-
-                                    {/* Preview Text */}
-                                    <div
-                                        className="relative z-10 text-center px-8"
-                                        style={{
-                                            fontFamily: editedPreset.font,
-                                            fontSize: `${Math.min(parseInt(editedPreset.font_size) * 0.4, 48)}px`,
-                                            color: assToHex(editedPreset.primary_color),
-                                            letterSpacing: `${(editedPreset.letter_spacing || 0) * 0.4}px`,
-                                            fontWeight: editedPreset.bold === 1 ? 'bold' : 'normal',
-                                            fontStyle: editedPreset.italic === 1 ? 'italic' : 'normal',
-                                            textDecoration: `${editedPreset.underline === -1 ? 'underline' : ''} ${editedPreset.strikeout === -1 ? 'line-through' : ''}`.trim(),
-                                            opacity: (editedPreset.opacity || 100) / 100,
-                                            transform: `
-                                                rotateX(${editedPreset.rotation_x || 0}deg) 
-                                                rotateY(${editedPreset.rotation_y || 0}deg) 
-                                                rotateZ(${editedPreset.rotation || 0}deg) 
-                                                skewX(${editedPreset.shear || 0}deg) 
-                                                scale(${(editedPreset.scale_x || 100) / 100}, ${(editedPreset.scale_y || 100) / 100})
-                                            `,
-                                            filter: `blur(${(editedPreset.blur || 0) * 0.5}px)`,
-                                            textShadow: `
-                                                ${editedPreset.border || 2}px ${editedPreset.border || 2}px 0 ${assToHex(editedPreset.outline_color)},
-                                                -${editedPreset.border || 2}px -${editedPreset.border || 2}px 0 ${assToHex(editedPreset.outline_color)},
-                                                ${editedPreset.border || 2}px -${editedPreset.border || 2}px 0 ${assToHex(editedPreset.outline_color)},
-                                                -${editedPreset.border || 2}px ${editedPreset.border || 2}px 0 ${assToHex(editedPreset.outline_color)}
-                                                ${editedPreset.shadow > 0 ? `, ${editedPreset.shadow * 2}px ${editedPreset.shadow * 2}px ${editedPreset.shadow * 3}px ${assToHex(editedPreset.shadow_color || '&H00000000')}` : ''}
-                                            `,
-                                            lineHeight: 1.4
-                                        }}
-                                    >
-                                        {previewText}
                                     </div>
-                                </div>
-                            ) : (
-                                <div className="bg-black rounded-lg flex items-center justify-center mx-auto" style={{ aspectRatio: '9/16', maxHeight: '600px', width: 'auto' }}>
-                                    <p className="text-white/30">No preset selected</p>
-                                </div>
-                            )}
+                                ) : (
+                                    <div className="text-white/20 flex flex-col items-center">
+                                        <Eye className="w-24 h-24 mb-4 opacity-20" />
+                                        <p>No preset selected</p>
+                                    </div>
+                                )}
+                            </div>
 
-                            {/* Preset Info */}
+                            {/* Preset Info Footer */}
                             {editedPreset && (
-                                <div className="mt-6 space-y-3">
-                                    <div className="bg-white/5 rounded-lg p-3">
-                                        <div className="text-xs text-white/50 mb-1">Preset ID</div>
-                                        <div className="font-mono text-sm">{editedPreset.id}</div>
+                                <div className="mt-4 grid grid-cols-4 gap-4 z-10 relative shrink-0">
+                                    <div className="bg-black/40 rounded-lg p-2 border border-white/5">
+                                        <div className="text-[10px] text-white/50 mb-1">ID</div>
+                                        <div className="font-mono text-xs truncate">{editedPreset.id}</div>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <div className="bg-white/5 rounded-lg p-3">
-                                            <div className="text-xs text-white/50 mb-1">Font</div>
-                                            <div className="text-sm truncate">{editedPreset.font}</div>
-                                        </div>
-                                        <div className="bg-white/5 rounded-lg p-3">
-                                            <div className="text-xs text-white/50 mb-1">Size</div>
-                                            <div className="text-sm">{editedPreset.font_size}px</div>
-                                        </div>
+                                    <div className="bg-black/40 rounded-lg p-2 border border-white/5">
+                                        <div className="text-[10px] text-white/50 mb-1">Font</div>
+                                        <div className="text-xs truncate">{editedPreset.font}</div>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <div className="bg-white/5 rounded-lg p-3">
-                                            <div className="text-xs text-white/50 mb-1">Primary</div>
-                                            <div className="flex items-center gap-2">
-                                                <div
-                                                    className="w-6 h-6 rounded border border-white/20"
-                                                    style={{ backgroundColor: assToHex(editedPreset.primary_color) }}
-                                                />
-                                                <div className="text-xs font-mono">{assToHex(editedPreset.primary_color)}</div>
-                                            </div>
-                                        </div>
-                                        <div className="bg-white/5 rounded-lg p-3">
-                                            <div className="text-xs text-white/50 mb-1">Outline</div>
-                                            <div className="flex items-center gap-2">
-                                                <div
-                                                    className="w-6 h-6 rounded border border-white/20"
-                                                    style={{ backgroundColor: assToHex(editedPreset.outline_color) }}
-                                                />
-                                                <div className="text-xs font-mono">{assToHex(editedPreset.outline_color)}</div>
-                                            </div>
-                                        </div>
+                                    <div className="bg-black/40 rounded-lg p-2 border border-white/5">
+                                        <div className="text-[10px] text-white/50 mb-1">Size</div>
+                                        <div className="text-xs">{editedPreset.font_size}px</div>
+                                    </div>
+                                    <div className="bg-black/40 rounded-lg p-2 border border-white/5 flex items-center gap-2">
+                                        <div
+                                            className="w-4 h-4 rounded border border-white/20"
+                                            style={{ backgroundColor: assToHex(editedPreset.primary_color) }}
+                                        />
+                                        <div className="text-[10px] font-mono">{assToHex(editedPreset.primary_color)}</div>
                                     </div>
                                 </div>
                             )}

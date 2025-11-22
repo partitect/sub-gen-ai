@@ -25,31 +25,63 @@ class AdvancedRenderer:
     def __init__(self, words: List[Dict], style: Dict):
         self.words = words
         self.style = style
-        # Calculate position based on alignment
-        # Alignment: 2 = Bottom, 8 = Top, 5 = Center
-        alignment = int(self.style.get("alignment", 2))
+        font = (style.get("font") or "Inter").split(",")[0].strip()
+        color_primary = hex_to_ass(style.get("primary_color", "&H00FFFFFF"))
+        color_outline = hex_to_ass(style.get("outline_color", "&H00000000"))
+        color_back = hex_to_ass(style.get("back_color", "&H00000000"))
+        border = style.get("border", 2)
+        shadow = style.get("shadow_blur") or style.get("shadow", 0)
+        size = style.get("font_size", 48)
+        alignment = style.get("alignment", 2)
+        italic = style.get("italic", 0)
+        bold = style.get("bold", 1)
+        border_style = style.get("border_style", 1)
+        margin_v = style.get("margin_v", 40)
         
-        # Screen dimensions (PlayResY = 1080)
+        self.header = f"""[Script Info]
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,{font},{size},{color_primary},&H000000FF,{color_outline},{color_back},{bold},{italic},0,0,100,100,0,0,{border_style},{border},{shadow},{alignment},20,20,{margin_v},0
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+"""
+
+    def _base_loop(self, effect_func) -> str:
+        lines = []
+        alignment = int(self.style.get("alignment", 2))
         screen_h = 1080
         cx = 1920 // 2
         
-        # Determine Y position (cy)
-        if alignment == 8: # Top
-            cy = 150 # Near top
-        elif alignment == 5: # Center
-            cy = screen_h // 2
-        else: # Bottom (2) or default
-            cy = screen_h - 150 # Near bottom (default 930)
+        if alignment == 8: cy = 150
+        elif alignment == 5: cy = screen_h // 2
+        else: cy = screen_h - 150
 
         for i, word in enumerate(self.words):
             start_ms = int(word['start'] * 1000)
             end_ms = int(word['end'] * 1000)
             duration = end_ms - start_ms
             
-            # Call the specific effect function with dynamic position
             new_lines = effect_func(word, start_ms, end_ms, duration, cx, cy)
             lines.extend(new_lines)
         return self.header + "\n".join(lines)
+
+    def render(self) -> str:
+        style_id = self.style.get("id", "default").replace("-", "_")
+        method_name = f"render_{style_id}"
+        
+        if hasattr(self, method_name):
+            return getattr(self, method_name)()
+        
+        # Fallbacks
+        if style_id == "neon_glow": return self.render_neon_pulse()
+        if style_id == "welcome_my_life": return self.render_word_pop()
+        
+        return self.render_word_pop()
 
     # --- 1. Fire Storm ---
     def render_fire_storm(self) -> str:
