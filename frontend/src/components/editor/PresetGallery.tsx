@@ -226,54 +226,70 @@ function PresetGalleryComponent({
   }, [presets, favorites.size]);
 
   // Helper to render the styled text preview
+  // This should match EXACTLY what the video renderer shows (minus animations)
   const renderPrevText = (preset: Preset) => {
-    const group = isGroupPreset(preset);
-    const activeColor = assToCssColor(preset.primary_color, "#ffffff");
-    const passiveColor = assToCssColor(preset.secondary_color, "#cccccc");
+    // Direct color mapping from ASS format
+    const textColor = assToCssColor(preset.primary_color, "#ffffff");
     const outlineColor = assToCssColor(preset.outline_color, "#000000");
-
-    const borderSize = (preset.border || 0) * 1;
-    const shadowDist = (preset.shadow || 0) * 2;
     const shadowColor = assToCssColor(preset.shadow_color, "rgba(0,0,0,0.5)");
+    const backColor = assToCssColor(preset.back_color, "transparent");
 
+    // Border (outline) simulation via text-shadow
+    const borderSize = Math.max(0, (preset.border || 0) * 0.6);
     const shadows: string[] = [];
+
     if (borderSize > 0) {
-      for (let i = 1; i <= Math.ceil(borderSize); i++) {
-        shadows.push(`${i}px ${i}px 0 ${outlineColor}`);
-        shadows.push(`-${i}px -${i}px 0 ${outlineColor}`);
-        shadows.push(`${i}px -${i}px 0 ${outlineColor}`);
-        shadows.push(`-${i}px ${i}px 0 ${outlineColor}`);
+      // 8-direction stroke simulation
+      const offsets = [
+        [1, 0], [0.7, 0.7], [0, 1], [-0.7, 0.7],
+        [-1, 0], [-0.7, -0.7], [0, -1], [0.7, -0.7]
+      ];
+      for (const [dx, dy] of offsets) {
+        shadows.push(`${dx * borderSize}px ${dy * borderSize}px 0 ${outlineColor}`);
       }
     }
+
+    // Shadow simulation
+    const shadowDist = (preset.shadow || 0) * 1;
     if (shadowDist > 0) {
-      shadows.push(`${shadowDist}px ${shadowDist}px 0px ${shadowColor}`);
+      shadows.push(`${shadowDist}px ${shadowDist}px ${preset.blur || 0}px ${shadowColor}`);
     }
 
-    const textShadowVal = shadows.join(", ");
+    // Transformations
+    const scaleX = (preset.scale_x ?? 100) / 100;
+    const scaleY = (preset.scale_y ?? 100) / 100;
+    const rotation = -(preset.rotation || 0);
 
-    const commonStyle = {
+    // Text decorations
+    const textDecor: string[] = [];
+    if (preset.underline) textDecor.push("underline");
+    if (preset.strikeout) textDecor.push("line-through");
+
+    // Check if should show background box
+    const hasBackColor = backColor !== "transparent" && backColor !== "rgba(0, 0, 0, 0.00)";
+
+    const style: React.CSSProperties = {
+      color: textColor,
       fontFamily: `"${preset.font}", "Inter", sans-serif`,
-      fontWeight: preset.bold ? "bold" : "normal",
+      fontWeight: preset.bold ? 700 : 400,
       fontStyle: preset.italic ? "italic" : "normal",
-      textShadow: textShadowVal,
+      textShadow: shadows.length > 0 ? shadows.join(", ") : "none",
+      letterSpacing: `${(preset.letter_spacing || 0) * 0.3}px`,
+      textDecoration: textDecor.length > 0 ? textDecor.join(" ") : "none",
+      transform: `rotate(${rotation}deg) scale(${scaleX}, ${scaleY})`,
+      transformOrigin: "center center",
+      backgroundColor: hasBackColor ? backColor : "transparent",
+      padding: hasBackColor ? "0.1em 0.3em" : "0",
+      borderRadius: hasBackColor ? "4px" : "0",
+      whiteSpace: "nowrap",
+      display: "inline-block",
     };
 
-    if (group) {
-      return (
-        <Box sx={{ ...commonStyle, fontSize: "0.9rem", lineHeight: 1.2, textAlign: 'center' }}>
-          <span style={{ color: activeColor }}>Awesome</span>
-          <span style={{ display: 'inline-block', width: '4px' }}></span>
-          <span style={{ color: passiveColor }}>Subcio</span>
-        </Box>
-      );
-    } else {
-      return (
-        <Box sx={{ ...commonStyle, fontSize: "1.2rem", textAlign: 'center' }}>
-          <span style={{ color: activeColor }}>Sub</span>
-          <span style={{ color: passiveColor }}>cio</span>
-        </Box>
-      );
-    }
+    return (
+      <Box sx={{ fontSize: "1rem", textAlign: "center", lineHeight: 1.4 }}>
+        <span style={style}>Subcio</span>
+      </Box>
+    );
   };
 
   return (

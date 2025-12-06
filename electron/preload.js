@@ -5,10 +5,10 @@ contextBridge.exposeInMainWorld('electron', {
   // App info
   isElectron: true,
   platform: process.platform,
-  
+
   // Get app version
   getVersion: () => ipcRenderer.invoke('get-version'),
-  
+
   // IPC communication
   send: (channel, data) => {
     const validChannels = ['new-project', 'open-file', 'save-file', 'export-video'];
@@ -16,23 +16,43 @@ contextBridge.exposeInMainWorld('electron', {
       ipcRenderer.send(channel, data);
     }
   },
-  
+
   receive: (channel, func) => {
     const validChannels = ['new-project', 'file-opened', 'file-saved', 'export-progress', 'export-complete'];
     if (validChannels.includes(channel)) {
       ipcRenderer.on(channel, (event, ...args) => func(...args));
     }
   },
-  
+
   // File dialogs
   openFile: () => ipcRenderer.invoke('dialog:openFile'),
   saveFile: (data) => ipcRenderer.invoke('dialog:saveFile', data),
-  
+
   // Export video using native FFmpeg (faster than wasm)
   exportVideo: (options) => ipcRenderer.invoke('export:video', options),
-  
+
   // Get backend URL
   getBackendUrl: () => 'http://127.0.0.1:8000',
+
+  // ==========================================================================
+  // License API
+  // ==========================================================================
+  license: {
+    // Get current license status
+    getStatus: () => ipcRenderer.invoke('license:getStatus'),
+
+    // Validate a license key
+    validate: (licenseKey) => ipcRenderer.invoke('license:validate', licenseKey),
+
+    // Activate license on this machine
+    activate: (licenseKey) => ipcRenderer.invoke('license:activate', licenseKey),
+
+    // Deactivate license from this machine
+    deactivate: () => ipcRenderer.invoke('license:deactivate'),
+
+    // Get machine ID (for support)
+    getMachineId: () => ipcRenderer.invoke('license:getMachineId'),
+  },
 });
 
 // Notify that we're in Electron

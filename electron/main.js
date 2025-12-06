@@ -4,6 +4,9 @@ const { spawn } = require('child_process');
 const http = require('http');
 const fs = require('fs');
 
+// License Manager
+const licenseManager = require('./license-manager');
+
 // Logging
 const log = require('electron-log');
 log.transports.file.level = 'debug';
@@ -246,6 +249,38 @@ function createMainWindow() {
 // Get app version
 ipcMain.handle('get-version', () => {
   return app.getVersion();
+});
+
+// =============================================================================
+// License IPC Handlers
+// =============================================================================
+
+// Get current license status
+ipcMain.handle('license:getStatus', () => {
+  return licenseManager.getLicenseStatus();
+});
+
+// Validate license key
+ipcMain.handle('license:validate', async (event, licenseKey) => {
+  log.info('[License] Validating license key...');
+  return await licenseManager.validateLicense(licenseKey);
+});
+
+// Activate license
+ipcMain.handle('license:activate', async (event, licenseKey) => {
+  log.info('[License] Activating license...');
+  return await licenseManager.activateLicense(licenseKey);
+});
+
+// Deactivate license
+ipcMain.handle('license:deactivate', async () => {
+  log.info('[License] Deactivating license...');
+  return await licenseManager.deactivateLicense();
+});
+
+// Get machine ID (for support purposes)
+ipcMain.handle('license:getMachineId', () => {
+  return licenseManager.getMachineId();
 });
 
 // Open file dialog

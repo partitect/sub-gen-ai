@@ -8,9 +8,23 @@
 }
 
 @font-face {
+  font-family: "Advent Pro";
+  src: url("./fonts/AdventPro.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Akaya Telivigala";
   src: url("./fonts/AkayaTelivigala.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Akaya Telivigala";
+  src: url("./fonts/AkayaTelivigala.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -22,9 +36,23 @@
 }
 
 @font-face {
+  font-family: "Arbutus";
+  src: url("./fonts/Arbutus.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Asimovian";
   src: url("./fonts/Asimovian.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Asimovian";
+  src: url("./fonts/Asimovian.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -36,9 +64,23 @@
 }
 
 @font-face {
+  font-family: "Atma";
+  src: url("./fonts/Atma.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Bahiana";
   src: url("./fonts/Bahiana.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Bahiana";
+  src: url("./fonts/Bahiana.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -50,9 +92,23 @@
 }
 
 @font-face {
+  font-family: "Bangers";
+  src: url("./fonts/Bangers.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Bebas Neue";
   src: url("./fonts/BebasNeue.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Bebas Neue";
+  src: url("./fonts/BebasNeue.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -64,9 +120,23 @@
 }
 
 @font-face {
+  font-family: "Bigelow Rules";
+  src: url("./fonts/BigelowRules.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Bowlby One SC";
   src: url("./fonts/BowlbyOneSC.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Bowlby One SC";
+  src: url("./fonts/BowlbyOneSC.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -78,9 +148,23 @@
 }
 
 @font-face {
+  font-family: "Braah One";
+  src: url("./fonts/BraahOne.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Bricolage Grotesque";
   src: url("./fonts/BricolageGrotesque.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("./fonts/BricolageGrotesque.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -92,9 +176,23 @@
 }
 
 @font-face {
+  font-family: "Bungee";
+  src: url("./fonts/Bungee.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Bungee Inline";
   src: url("./fonts/BungeeInline.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Bungee Inline";
+  src: url("./fonts/BungeeInline.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -106,9 +204,23 @@
 }
 
 @font-face {
+  font-family: "Capriola";
+  src: url("./fonts/Capriola.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Cherry Bomb One";
   src: url("./fonts/CherryBombOne.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Cherry Bomb One";
+  src: url("./fonts/CherryBombOne.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -120,9 +232,23 @@
 }
 
 @font-face {
+  font-family: "Climate Crisis";
+  src: url("./fonts/ClimateCrisis.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Coiny";
   src: url("./fonts/Coiny.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Coiny";
+  src: url("./fonts/Coiny.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -134,9 +260,23 @@
 }
 
 @font-face {
+  font-family: "Comic Neue";
+  src: url("./fonts/ComicNeue.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Crushed";
   src: url("./fonts/Crushed.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Crushed";
+  src: url("./fonts/Crushed.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -148,9 +288,23 @@
 }
 
 @font-face {
+  font-family: "Dela Gothic One";
+  src: url("./fonts/DelaGothicOne.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Denk One";
   src: url("./fonts/DenkOne.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Denk One";
+  src: url("./fonts/DenkOne.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -162,9 +316,23 @@
 }
 
 @font-face {
+  font-family: "Eater";
+  src: url("./fonts/Eater.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Englebert";
   src: url("./fonts/Englebert.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Englebert";
+  src: url("./fonts/Englebert.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -176,9 +344,23 @@
 }
 
 @font-face {
+  font-family: "Freckle Face";
+  src: url("./fonts/FreckleFace.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Fruktur";
   src: url("./fonts/Fruktur.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Fruktur";
+  src: url("./fonts/Fruktur.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -190,9 +372,23 @@
 }
 
 @font-face {
+  font-family: "Gluten";
+  src: url("./fonts/Gluten.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Grandstander";
   src: url("./fonts/Grandstander.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Grandstander";
+  src: url("./fonts/Grandstander.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -204,9 +400,23 @@
 }
 
 @font-face {
+  font-family: "Hanalei Fill";
+  src: url("./fonts/HanaleiFill.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Just Another Hand";
   src: url("./fonts/JustAnotherHand.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Just Another Hand";
+  src: url("./fonts/JustAnotherHand.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -218,9 +428,23 @@
 }
 
 @font-face {
+  font-family: "Lato";
+  src: url("./fonts/Lato.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Lemon";
   src: url("./fonts/Lemon.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Lemon";
+  src: url("./fonts/Lemon.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -232,9 +456,23 @@
 }
 
 @font-face {
+  font-family: "Lemonada";
+  src: url("./fonts/Lemonada.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Love Ya Like A Sister";
   src: url("./fonts/LoveYaLikeASister.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Love Ya Like A Sister";
+  src: url("./fonts/LoveYaLikeASister.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -246,9 +484,23 @@
 }
 
 @font-face {
+  font-family: "Lovedbythe King";
+  src: url("./fonts/LovedbytheKing.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Luckiest Guy";
   src: url("./fonts/LuckiestGuy.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Luckiest Guy";
+  src: url("./fonts/LuckiestGuy.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -260,9 +512,23 @@
 }
 
 @font-face {
+  font-family: "Mali";
+  src: url("./fonts/Mali.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Marhey";
   src: url("./fonts/Marhey.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Marhey";
+  src: url("./fonts/Marhey.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -274,9 +540,23 @@
 }
 
 @font-face {
+  font-family: "Matemasie";
+  src: url("./fonts/Matemasie.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Montserrat";
   src: url("./fonts/Montserrat.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Montserrat";
+  src: url("./fonts/Montserrat.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -288,9 +568,23 @@
 }
 
 @font-face {
+  font-family: "Mouse Memoirs";
+  src: url("./fonts/MouseMemoirs.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Nova Oval";
   src: url("./fonts/NovaOval.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Nova Oval";
+  src: url("./fonts/NovaOval.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -302,9 +596,23 @@
 }
 
 @font-face {
+  font-family: "Nunito";
+  src: url("./fonts/Nunito.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Oldenburg";
   src: url("./fonts/Oldenburg.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Oldenburg";
+  src: url("./fonts/Oldenburg.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -316,9 +624,23 @@
 }
 
 @font-face {
+  font-family: "Open Sans";
+  src: url("./fonts/OpenSans.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Open Sans Condensed";
   src: url("./fonts/OpenSansCondensed.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Open Sans Condensed";
+  src: url("./fonts/OpenSansCondensed.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -330,9 +652,23 @@
 }
 
 @font-face {
+  font-family: "Original Surfer";
+  src: url("./fonts/OriginalSurfer.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Oswald";
   src: url("./fonts/Oswald.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Oswald";
+  src: url("./fonts/Oswald.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -344,9 +680,23 @@
 }
 
 @font-face {
+  font-family: "Pangolin";
+  src: url("./fonts/Pangolin.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Patrick Hand";
   src: url("./fonts/PatrickHand.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Patrick Hand";
+  src: url("./fonts/PatrickHand.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -358,9 +708,23 @@
 }
 
 @font-face {
+  font-family: "Peralta";
+  src: url("./fonts/Peralta.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Potta One";
   src: url("./fonts/PottaOne.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Potta One";
+  src: url("./fonts/PottaOne.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -372,9 +736,23 @@
 }
 
 @font-face {
+  font-family: "Purple Purse";
+  src: url("./fonts/PurplePurse.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Rammetto One";
   src: url("./fonts/RammettoOne.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Rammetto One";
+  src: url("./fonts/RammettoOne.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -386,9 +764,23 @@
 }
 
 @font-face {
+  font-family: "Ranchers";
+  src: url("./fonts/Ranchers.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Ribeye";
   src: url("./fonts/Ribeye.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Ribeye";
+  src: url("./fonts/Ribeye.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -400,9 +792,23 @@
 }
 
 @font-face {
+  font-family: "Risque";
+  src: url("./fonts/Risque.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Road Rage";
   src: url("./fonts/RoadRage.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Road Rage";
+  src: url("./fonts/RoadRage.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -414,9 +820,23 @@
 }
 
 @font-face {
+  font-family: "Roboto";
+  src: url("./fonts/Roboto.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Roboto Condensed";
   src: url("./fonts/RobotoCondensed.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Roboto Condensed";
+  src: url("./fonts/RobotoCondensed.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -428,9 +848,23 @@
 }
 
 @font-face {
+  font-family: "Rubik Wet Paint";
+  src: url("./fonts/RubikWetPaint.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Rum Raisin";
   src: url("./fonts/RumRaisin.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Rum Raisin";
+  src: url("./fonts/RumRaisin.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -442,9 +876,23 @@
 }
 
 @font-face {
+  font-family: "Ruslan Display";
+  src: url("./fonts/RuslanDisplay.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Shojumaru";
   src: url("./fonts/Shojumaru.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Shojumaru";
+  src: url("./fonts/Shojumaru.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -456,9 +904,23 @@
 }
 
 @font-face {
+  font-family: "Spicy Rice";
+  src: url("./fonts/SpicyRice.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Uncial Antiqua";
   src: url("./fonts/UncialAntiqua.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Uncial Antiqua";
+  src: url("./fonts/UncialAntiqua.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -470,9 +932,23 @@
 }
 
 @font-face {
+  font-family: "Vend Sans";
+  src: url("./fonts/VendSans.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Viaoda Libre";
   src: url("./fonts/ViaodaLibre.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Viaoda Libre";
+  src: url("./fonts/ViaodaLibre.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }
 
@@ -484,8 +960,22 @@
 }
 
 @font-face {
+  font-family: "Wellfleet";
+  src: url("./fonts/Wellfleet.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
   font-family: "Winky Sans";
   src: url("./fonts/WinkySans.ttf") format("truetype");
   font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Winky Sans";
+  src: url("./fonts/WinkySans.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
 }

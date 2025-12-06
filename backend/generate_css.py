@@ -126,8 +126,16 @@ def generate_css():
         variants = families[fam_name]
         variants.sort(key=lambda x: (x['weight'], x['style']))
         
+        # Track which weight/style combos we've emitted to avoid duplicates
+        emitted = set()
+        
         for v in variants:
-            css_block = f"""
+            key_normal = (v['weight'], v['style'])
+            key_bold = (700, v['style'])
+            
+            # Generate the standard rule
+            if key_normal not in emitted:
+                css_block = f"""
 @font-face {{
   font-family: "{fam_name}";
   src: url("./fonts/{v['filename']}") format("truetype");
@@ -135,7 +143,22 @@ def generate_css():
   font-style: {v['style']};
 }}
 """.strip()
-            lines.append(css_block)
+                lines.append(css_block)
+                emitted.add(key_normal)
+            
+            # ALWAYS also register for bold weight (700) if this is a normal weight font
+            # This ensures JASSUB can find the font when bold is requested
+            if v['weight'] == 400 and key_bold not in emitted:
+                css_bold = f"""
+@font-face {{
+  font-family: "{fam_name}";
+  src: url("./fonts/{v['filename']}") format("truetype");
+  font-weight: 700;
+  font-style: {v['style']};
+}}
+""".strip()
+                lines.append(css_bold)
+                emitted.add(key_bold)
             
     return "\n\n".join(lines)
 

@@ -25,10 +25,13 @@ import {
   ArrowLeft,
   Database,
   Trash2,
-  HardDrive
+  HardDrive,
+  Key,
+  Shield,
 } from "lucide-react";
 import { useTheme as useAppTheme } from "../ThemeContext";
 import { useSettings } from "../contexts/SettingsContext";
+import { useLicenseContext } from "../contexts/LicenseContext";
 import axios from "axios";
 import { useEffect } from "react";
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
@@ -120,6 +123,9 @@ export default function SettingsPage() {
           }}
         >
           <List sx={{ p: 2 }}>
+            {/* License Management */}
+            <LicenseSection />
+
             {/* Theme */}
             <ListItem
               sx={{
@@ -253,5 +259,60 @@ export default function SettingsPage() {
         </Paper>
       </Container>
     </Box>
+  );
+}
+
+// License Section Component
+function LicenseSection() {
+  const { isPro, isLoading } = useLicenseContext();
+  const { t } = useTranslation();
+  const theme = useTheme();
+
+  const openLicenseDialog = () => {
+    if ((window as any).openLicenseDialog) {
+      (window as any).openLicenseDialog();
+    }
+  };
+
+  return (
+    <ListItem
+      sx={{
+        bgcolor: alpha(isPro ? theme.palette.success.main : theme.palette.warning.main, 0.1),
+        borderRadius: 2,
+        mb: 2,
+        p: 2,
+      }}
+    >
+      <ListItemIcon>
+        <Key size={24} />
+      </ListItemIcon>
+      <ListItemText
+        primary={t('settings.license.title') || "Lisans Yönetimi"}
+        secondary={
+          isLoading
+            ? "Yükleniyor..."
+            : isPro
+              ? "Pro sürüm aktif ✓"
+              : "Ücretsiz sürüm - Pro'ya yükseltin"
+        }
+        primaryTypographyProps={{ fontWeight: 600 }}
+      />
+      <Stack direction="row" spacing={1} alignItems="center">
+        <Chip
+          label={isPro ? "PRO" : "FREE"}
+          color={isPro ? "success" : "warning"}
+          size="small"
+          icon={isPro ? <Shield size={14} /> : undefined}
+        />
+        <Button
+          variant={isPro ? "outlined" : "contained"}
+          color={isPro ? "inherit" : "primary"}
+          size="small"
+          onClick={openLicenseDialog}
+        >
+          {isPro ? "Yönet" : "Aktifleştir"}
+        </Button>
+      </Stack>
+    </ListItem>
   );
 }
