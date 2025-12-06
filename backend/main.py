@@ -228,15 +228,16 @@ EXPORT_LOCK = threading.Lock()
 
 
 # Mapping for standard weights
+# Mapping for standard weights
 WEIGHT_MAP = {
     "thin": 100, "hairline": 100,
-    "extralight": 200, "extra-light": 200, "ultralight": 200, "ultra-light": 200,
+    "extralight": 200, "extra-light": 200, "extra light": 200, "ultralight": 200, "ultra-light": 200, "ultra light": 200,
     "light": 300,
     "regular": 400, "normal": 400, "book": 400, "medium": 500,
-    "semibold": 600, "semi-bold": 600, "demibold": 600,
+    "semibold": 600, "semi-bold": 600, "semi bold": 600, "demibold": 600, "demi bold": 600,
     "bold": 700,
-    "extrabold": 800, "extra-bold": 800, "ultrabold": 800, "ultra-bold": 800, "heavy": 800,
-    "black": 900, "extrablack": 950
+    "extrabold": 800, "extra-bold": 800, "extra bold": 800, "ultrabold": 800, "ultra-bold": 800, "ultra bold": 800, "heavy": 800,
+    "black": 900, "extrablack": 950, "extra black": 950
 }
 
 def parse_font_metadata(path: Path) -> dict:
@@ -283,7 +284,7 @@ def parse_font_metadata(path: Path) -> dict:
     ]
     
     # Add weights to remove patterns
-    for w_name in WEIGHT_MAP.keys():
+    for w_name in sorted(WEIGHT_MAP.keys(), key=len, reverse=True):
         remove_patterns.append(rf"\b{re.escape(w_name)}\b")
         
     temp_name = clean_name
