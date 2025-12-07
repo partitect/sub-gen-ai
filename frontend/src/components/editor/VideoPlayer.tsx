@@ -1,6 +1,6 @@
 import { memo, RefObject, VideoHTMLAttributes, AudioHTMLAttributes } from "react";
 import { useTranslation } from "react-i18next";
-import { Box, Stack, Typography, alpha, Chip, CircularProgress } from "@mui/material";
+import { Box, Stack, Typography, alpha, Chip, CircularProgress, SxProps, Theme } from "@mui/material";
 import { Pause, Play, Zap } from "lucide-react";
 import JSOOverlay from "../JSOOverlay";
 
@@ -21,6 +21,8 @@ interface VideoPlayerProps {
   getVideoProps: () => VideoHTMLAttributes<HTMLVideoElement>;
   getAudioProps: () => AudioHTMLAttributes<HTMLAudioElement>;
   getBgVideoProps: () => VideoHTMLAttributes<HTMLVideoElement>;
+  sx?: SxProps<Theme>;
+  objectFit?: "contain" | "cover" | "fill" | "none" | "scale-down";
 }
 
 /**
@@ -44,6 +46,8 @@ function VideoPlayerComponent({
   getVideoProps,
   getAudioProps,
   getBgVideoProps,
+  sx,
+  objectFit = "contain",
 }: VideoPlayerProps) {
   const { t } = useTranslation();
 
@@ -59,6 +63,7 @@ function VideoPlayerComponent({
         borderRadius: 2,
         overflow: "hidden",
         aspectRatio: "16 / 9",
+        ...sx,
       }}
     >
       {/* Video Mode - Native HTML5 Video */}
@@ -74,7 +79,7 @@ function VideoPlayerComponent({
           sx={{
             width: "100%",
             height: "100%",
-            objectFit: "contain",
+            objectFit: objectFit,
           }}
         />
       )}

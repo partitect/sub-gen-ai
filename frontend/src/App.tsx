@@ -8,6 +8,7 @@ import EditorPage from "./pages/EditorPage";
 import ExportPage from "./pages/ExportPage";
 import DashboardPage from "./pages/DashboardPage";
 import SettingsPage from "./pages/SettingsPage";
+import AdminPage from "./pages/AdminPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import LicenseDialog from "./components/LicenseDialog";
 
@@ -59,6 +60,7 @@ export default function App() {
           <Route path="/editor/:projectId" element={<EditorPage />} />
           <Route path="/export/:projectId" element={<ExportPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/admin" element={<AdminPage />} />
 
           {/* Info Pages removed */}
 

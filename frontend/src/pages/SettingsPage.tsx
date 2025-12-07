@@ -28,6 +28,7 @@ import {
   HardDrive,
   Key,
   Shield,
+  Settings,
 } from "lucide-react";
 import { useTheme as useAppTheme } from "../ThemeContext";
 import { useSettings } from "../contexts/SettingsContext";
@@ -126,6 +127,8 @@ export default function SettingsPage() {
             {/* License Management */}
             <LicenseSection />
 
+            {/* Admin Panel Link - Only for Super Admins */}
+            <AdminSection />
             {/* Theme */}
             <ListItem
               sx={{
@@ -312,6 +315,51 @@ function LicenseSection() {
         >
           {isPro ? "Yönet" : "Aktifleştir"}
         </Button>
+      </Stack>
+    </ListItem>
+  );
+}
+
+// Admin Section Component - Only visible for Super Admins
+function AdminSection() {
+  const { isSuperAdmin, isLoading } = useLicenseContext();
+  const theme = useTheme();
+  const navigate = useNavigate();
+
+  // Don't show for non-super-admins
+  if (isLoading || !isSuperAdmin) {
+    return null;
+  }
+
+  return (
+    <ListItem
+      sx={{
+        bgcolor: alpha(theme.palette.secondary.main, 0.1),
+        borderRadius: 2,
+        mb: 2,
+        p: 2,
+        cursor: "pointer",
+        "&:hover": {
+          bgcolor: alpha(theme.palette.secondary.main, 0.15),
+        },
+      }}
+      onClick={() => navigate("/admin")}
+    >
+      <ListItemIcon>
+        <Settings size={24} />
+      </ListItemIcon>
+      <ListItemText
+        primary="Admin Panel"
+        secondary="Preset yönetimi ve sistem ayarları"
+        primaryTypographyProps={{ fontWeight: 600 }}
+      />
+      <Stack direction="row" spacing={1} alignItems="center">
+        <Chip
+          label="SUPER ADMIN"
+          color="secondary"
+          size="small"
+          icon={<Shield size={14} />}
+        />
       </Stack>
     </ListItem>
   );

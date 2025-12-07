@@ -7,6 +7,7 @@ interface LicenseContextType {
     error: string | null;
     isPro: boolean;
     isLicensed: boolean;
+    isSuperAdmin: boolean;
     checkLicenseStatus: () => Promise<void>;
     activateLicense: (licenseKey: string) => Promise<LicenseResult>;
     deactivateLicense: () => Promise<boolean>;

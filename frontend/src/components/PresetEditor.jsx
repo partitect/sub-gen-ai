@@ -1,57 +1,66 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import axios from "axios";
 import {
-  Save,
-  RotateCcw,
-  Plus,
-  Layout,
-  Type,
-  Palette,
-  Zap,
-  MousePointer2,
-  Camera,
-  Image as ImageIcon,
-  ChevronLeft,
-  Wand2,
-  ListFilter,
-  Search,
+    Save,
+    RotateCcw,
+    Plus,
+    Layout,
+    Type,
+    Palette,
+    Zap,
+    MousePointer2,
+    Camera,
+    Image as ImageIcon,
+    ChevronLeft,
+    Wand2,
+    ListFilter,
+    Search,
+    Trash2,
+    Bold,
+    Italic,
+    Underline,
+    Strikethrough,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import html2canvas from "html2canvas";
 import { Link } from "react-router-dom";
+import { VideoPlayer } from "./editor/VideoPlayer";
+import useMediaPlayer from "../hooks/useMediaPlayer";
+import useAssPreview from "../hooks/useAssPreview";
+import { getAssetPath } from "../utils/assetPath";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
 const colorPalettes = [
-  { name: "Fire", primary: "#ff7a2b", outline: "#1f0a00", shadow: "#0c0505" },
-  { name: "Neon", primary: "#ff5cf0", outline: "#1c032f", shadow: "#0b0016" },
-  { name: "Ice", primary: "#8ae3ff", outline: "#0f3a55", shadow: "#04121f" },
-  { name: "Sunset", primary: "#ffd166", outline: "#743c00", shadow: "#2d1100" },
-  { name: "Mono", primary: "#ffffff", outline: "#000000", shadow: "#000000" },
+    { name: "Fire", primary: "#ff7a2b", outline: "#1f0a00", shadow: "#0c0505" },
+    { name: "Neon", primary: "#ff5cf0", outline: "#1c032f", shadow: "#0b0016" },
+    { name: "Ice", primary: "#8ae3ff", outline: "#0f3a55", shadow: "#04121f" },
+    { name: "Sunset", primary: "#ffd166", outline: "#743c00", shadow: "#2d1100" },
+    { name: "Mono", primary: "#ffffff", outline: "#000000", shadow: "#000000" },
 ];
 
 const alignmentPresets = [
-  { key: "top", label: "Ust", alignment: 8, margin: 90 },
-  { key: "middle", label: "Orta", alignment: 5, margin: 40 },
-  { key: "bottom", label: "Alt", alignment: 2, margin: 60 },
+    { key: "top", label: "Ust", alignment: 8, margin: 90 },
+    { key: "middle", label: "Orta", alignment: 5, margin: 40 },
+    { key: "bottom", label: "Alt", alignment: 2, margin: 60 },
 ];
 
 const resolveFontStack = (fontName = "Inter") => {
-  const cleaned = fontName.trim();
-  const alt1 = cleaned.replace(/\s+/g, "-");
-  const alt2 = cleaned.replace(/-/g, " ");
-  const stack = [cleaned, alt1, alt2, "Inter"].filter(
-    (v, idx, arr) => v && arr.indexOf(v) === idx
-  );
-  return stack.join(", ");
+    const cleaned = fontName.trim();
+    const alt1 = cleaned.replace(/\s+/g, "-");
+    const alt2 = cleaned.replace(/-/g, " ");
+    const stack = [cleaned, alt1, alt2, "Inter"].filter(
+        (v, idx, arr) => v && arr.indexOf(v) === idx
+    );
+    return stack.join(", ");
 };
 
 const detectPreviewMode = (preset) => {
-  const id = preset?.id || "";
-  if (id.includes("group") || id.includes("sentence") || id.includes("box")) {
-    return "group";
-  }
-  return "word";
+    const id = preset?.id || "";
+    if (id.includes("group") || id.includes("sentence") || id.includes("box")) {
+        return "group";
+    }
+    return "word";
 };
 
 // Helper: Convert ASS color (&HAABBGGRR) to Hex (#RRGGBB)
@@ -84,6 +93,76 @@ const hexToASS = (hex) => {
     const g = clean.substring(2, 4);
     const b = clean.substring(4, 6);
     return `&H00${b}${g}${r}`;
+};
+
+const SAMPLE_WORDS = [
+    { start: 0, end: 1.0, text: "Bu" },
+    { start: 1.0, end: 2.0, text: "bir" },
+    { start: 2.0, end: 3.5, text: "canli" },
+    { start: 3.5, end: 5.0, text: "onizleme" },
+    { start: 5.0, end: 6.5, text: "testidir." },
+    { start: 7.0, end: 8.5, text: "Admin" },
+    { start: 8.5, end: 10.0, text: "paneli" },
+    { start: 10.0, end: 12.0, text: "icin" },
+    { start: 12.0, end: 13.5, text: "ozellestirilmis" },
+    { start: 13.5, end: 15.0, text: "yeni" },
+    { start: 15.0, end: 16.5, text: "video" },
+    { start: 16.5, end: 18.0, text: "oynaticisi." },
+    { start: 18.5, end: 20.0, text: "Keyfini" },
+    { start: 20.0, end: 22.0, text: "cikarin!" },
+];
+
+const RealTimePreview = ({ preset }) => {
+    const previewStyle = useMemo(() => {
+        if (!preset) return null;
+        return {
+            ...preset,
+            primary_color: assToHex(preset.primary_color),
+            secondary_color: assToHex(preset.secondary_color),
+            outline_color: assToHex(preset.outline_color),
+            shadow_color: assToHex(preset.shadow_color),
+            back_color: assToHex(preset.back_color),
+        };
+    }, [preset]);
+
+    const { assContent } = useAssPreview({
+        words: SAMPLE_WORDS,
+        style: previewStyle,
+        enabled: !!previewStyle,
+        debounceMs: 100
+    });
+
+    const {
+        videoRef, audioRef, bgVideoRef,
+        state: mediaState,
+        controls: mediaControls,
+        getVideoProps, getAudioProps, getBgVideoProps
+    } = useMediaPlayer("video", {});
+
+    const overlayRef = useRef(null);
+
+    return (
+        <div className="w-full h-full bg-black rounded-lg overflow-hidden relative border border-white/10">
+            <VideoPlayer
+                mediaType="video"
+                videoRef={videoRef}
+                audioRef={audioRef}
+                bgVideoRef={bgVideoRef}
+                overlayRef={overlayRef}
+                resolvedVideoUrl={getAssetPath("audiobg/audio-bg-1.mp4")}
+                resolvedAudioUrl=""
+                bgVideoUrl=""
+                assContent={assContent}
+                isPlaying={mediaState.isPlaying}
+                onTogglePlay={mediaControls.toggle}
+                getVideoProps={getVideoProps}
+                getAudioProps={getAudioProps}
+                getBgVideoProps={getBgVideoProps}
+                sx={{ height: "100%", aspectRatio: "auto" }}
+                objectFit="cover"
+            />
+        </div>
+    );
 };
 
 export default function PresetEditor() {
@@ -149,10 +228,16 @@ export default function PresetEditor() {
     const fetchFontList = async () => {
         try {
             const res = await axios.get(`${API_BASE}/fonts`);
-            const fonts = res.data?.fonts || [];
-            setFontOptions(fonts.sort((a, b) => a.localeCompare(b)));
+            // Backend returns { fonts: [{name: "FontName", file: "filename.ttf"}, ...] }
+            const fontData = res.data?.fonts || [];
+            // Extract font names from objects
+            const fontNames = fontData.map(f => typeof f === 'string' ? f : f.name).filter(Boolean);
+            setFontOptions(fontNames.sort((a, b) => a.localeCompare(b)));
+            console.log(`Loaded ${fontNames.length} fonts`);
         } catch (err) {
             console.error("Failed to fetch fonts", err);
+            // Fallback to common fonts
+            setFontOptions(["Arial", "Roboto", "Montserrat", "Inter", "Poppins"]);
         }
     };
 
@@ -196,7 +281,7 @@ export default function PresetEditor() {
         }
     };
 
-    const handleCreateNew = () => {
+    const handleCreateNew = async () => {
         const newId = `custom-${Date.now()}`;
         const newPreset = {
             id: newId,
@@ -206,13 +291,43 @@ export default function PresetEditor() {
             secondary_color: "&H0000FFFF",
             outline_color: "&H00000000",
             back_color: "&H00000000",
+            shadow_color: "&H00000000",
             alignment: 2,
             margin_v: 50,
+            margin_l: 10,
+            margin_r: 10,
             bold: 1,
-            italic: 0
+            italic: 0,
+            border: 2,
+            shadow: 1,
         };
-        setPresets([...presets, newPreset]);
-        selectPreset(newPreset);
+        try {
+            await axios.post(`${API_BASE}/presets/create`, newPreset);
+            await fetchPresets();
+            selectPreset(newPreset);
+        } catch (err) {
+            console.error("Failed to create preset", err);
+            // Add locally anyway
+            setPresets([...presets, newPreset]);
+            selectPreset(newPreset);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!editedPreset) return;
+        if (!confirm(`"${editedPreset.id}" silinsin mi?`)) return;
+        try {
+            await axios.delete(`${API_BASE}/presets/${editedPreset.id}`);
+            await fetchPresets();
+            // Select first preset after deletion
+            if (presets.length > 1) {
+                const remaining = presets.filter(p => p.id !== editedPreset.id);
+                if (remaining.length > 0) selectPreset(remaining[0]);
+            }
+        } catch (err) {
+            console.error("Failed to delete preset", err);
+            alert("Preset silinemedi.");
+        }
     };
 
     const handleCapture = async () => {
@@ -281,84 +396,7 @@ export default function PresetEditor() {
         }
     };
 
-    // --- PREVIEW COMPONENT ---
-    const LivePreview = ({ style, background, mode }) => {
-        const containerStyle = {
-            fontFamily: resolveFontStack(style.font || 'Arial'),
-            fontSize: `${style.font_size || 60}px`,
-            fontWeight: style.bold ? 'bold' : 'normal',
-            fontStyle: style.italic ? 'italic' : 'normal',
-            textShadow: `
-                -1px -1px 0 ${assToHex(style.outline_color)},  
-                 1px -1px 0 ${assToHex(style.outline_color)},
-                -1px  1px 0 ${assToHex(style.outline_color)},
-                 1px  1px 0 ${assToHex(style.outline_color)},
-                 2px 2px 4px ${assToHex(style.shadow_color || '&H00000000')}
-            `,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '1rem',
-            height: '100%',
-            width: '100%',
-            color: assToHex(style.primary_color),
-            position: 'relative',
-            overflow: 'hidden',
-            borderRadius: '0.5rem',
-            // Background Logic
-            background: background === 'gradient' ? 'linear-gradient(45deg, #1a1a2e 0%, #16213e 100%)' :
-                background === 'white' ? '#ffffff' :
-                    background === 'black' ? '#000000' :
-                        background === 'green' ? '#00ff00' : 'transparent',
-            backgroundImage: background === 'image' ? 'url("https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80")' : undefined,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-        };
 
-        const activeWordStyle = {
-            color: assToHex(style.secondary_color),
-            transform: `scale(${style.active_scale ? style.active_scale / 100 : 1.1})`,
-            backgroundColor: style.active_bg_color ? assToHex(style.active_bg_color) : 'transparent',
-            padding: style.active_bg_color ? '6px 12px' : '0 6px',
-            borderRadius: '8px',
-            transition: 'all 0.3s ease',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            lineHeight: 1.1
-        };
-        const passiveStyle = {
-            opacity: 0.55,
-            color: assToHex(style.primary_color),
-            textShadow: containerStyle.textShadow,
-            fontSize: `${(style.font_size || 60) * 0.62}px`,
-            fontFamily: containerStyle.fontFamily,
-        };
-
-        return (
-            <div ref={previewRef} style={containerStyle}>
-                {/* Grid lines (only visible on gradient/black for reference) */}
-                {(background === 'gradient' || background === 'black') && (
-                    <div className="absolute inset-0 pointer-events-none opacity-10"
-                        style={{ backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize: '50px 50px' }}>
-                    </div>
-                )}
-
-                {mode === 'group' ? (
-                    <div className="w-full flex flex-col gap-2 items-center text-center px-4">
-                        <span style={passiveStyle}>Grup stili ornek satir</span>
-                        <span style={activeWordStyle}>AKTIF KELIME</span>
-                        <span style={passiveStyle}>Kapanis satiri</span>
-                    </div>
-                ) : (
-                    <div className="flex flex-col gap-2 items-center">
-                        <span style={activeWordStyle}>AKTIF</span>
-                        <span className="text-[11px] text-slate-200/70 tracking-wide">Kelime modu</span>
-                    </div>
-                )}
-            </div>
-        );
-    };
 
     if (!editedPreset) return <div className="p-10 text-white">Loading...</div>;
 
@@ -378,8 +416,8 @@ export default function PresetEditor() {
                             key={p.id}
                             onClick={() => selectPreset(p)}
                             className={`w-full text-left px-3 py-2 rounded text-sm transition-all ${selectedPresetId === p.id
-                                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                                    : 'hover:bg-white/5 text-slate-400'
+                                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                : 'hover:bg-white/5 text-slate-400'
                                 }`}
                         >
                             {p.id}
@@ -404,6 +442,12 @@ export default function PresetEditor() {
                         <span className="px-2 py-0.5 bg-slate-700 rounded text-xs text-slate-300">ID: {editedPreset.id}</span>
                     </div>
                     <div className="flex gap-3">
+                        <button
+                            onClick={handleDelete}
+                            className="flex items-center gap-2 px-4 py-2 bg-red-500/20 hover:bg-red-500/40 border border-red-500/30 rounded-lg text-sm text-red-400 hover:text-red-300 transition"
+                        >
+                            <Trash2 size={16} /> Sil
+                        </button>
                         <button
                             onClick={() => selectPreset(presets.find(p => p.id === selectedPresetId))}
                             className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm transition"
@@ -513,6 +557,169 @@ export default function PresetEditor() {
                                             </button>
                                         ))}
                                     </div>
+
+                                    {/* Style Options: Bold, Italic, Underline, Strikeout, Border, Shadow */}
+                                    <div className="col-span-2 grid grid-cols-6 gap-3 mt-4 pt-4 border-t border-white/5">
+                                        {/* Bold Toggle */}
+                                        <div>
+                                            <label className="text-xs text-slate-400 mb-1 block">Bold</label>
+                                            <button
+                                                onClick={() => handleChange('bold', editedPreset.bold ? 0 : 1)}
+                                                className={`w-full flex items-center justify-center gap-1 py-2.5 rounded-lg border transition ${editedPreset.bold
+                                                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-400/50'
+                                                    : 'bg-slate-800 text-slate-400 border-white/10 hover:border-emerald-400/30'
+                                                    }`}
+                                            >
+                                                <Bold size={16} />
+                                            </button>
+                                        </div>
+                                        {/* Italic Toggle */}
+                                        <div>
+                                            <label className="text-xs text-slate-400 mb-1 block">Italic</label>
+                                            <button
+                                                onClick={() => handleChange('italic', editedPreset.italic ? 0 : 1)}
+                                                className={`w-full flex items-center justify-center gap-1 py-2.5 rounded-lg border transition ${editedPreset.italic
+                                                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-400/50'
+                                                    : 'bg-slate-800 text-slate-400 border-white/10 hover:border-emerald-400/30'
+                                                    }`}
+                                            >
+                                                <Italic size={16} />
+                                            </button>
+                                        </div>
+                                        {/* Underline Toggle */}
+                                        <div>
+                                            <label className="text-xs text-slate-400 mb-1 block">Underline</label>
+                                            <button
+                                                onClick={() => handleChange('underline', editedPreset.underline ? 0 : 1)}
+                                                className={`w-full flex items-center justify-center gap-1 py-2.5 rounded-lg border transition ${editedPreset.underline
+                                                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-400/50'
+                                                    : 'bg-slate-800 text-slate-400 border-white/10 hover:border-emerald-400/30'
+                                                    }`}
+                                            >
+                                                <Underline size={16} />
+                                            </button>
+                                        </div>
+                                        {/* Strikeout Toggle */}
+                                        <div>
+                                            <label className="text-xs text-slate-400 mb-1 block">Strikeout</label>
+                                            <button
+                                                onClick={() => handleChange('strikeout', editedPreset.strikeout ? 0 : 1)}
+                                                className={`w-full flex items-center justify-center gap-1 py-2.5 rounded-lg border transition ${editedPreset.strikeout
+                                                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-400/50'
+                                                    : 'bg-slate-800 text-slate-400 border-white/10 hover:border-emerald-400/30'
+                                                    }`}
+                                            >
+                                                <Strikethrough size={16} />
+                                            </button>
+                                        </div>
+                                        {/* Border Size */}
+                                        <div>
+                                            <label className="text-xs text-slate-400 mb-1 block">Border: {editedPreset.border || 0}</label>
+                                            <input
+                                                type="range"
+                                                min="0"
+                                                max="10"
+                                                step="0.5"
+                                                value={editedPreset.border || 0}
+                                                onChange={(e) => handleChange('border', parseFloat(e.target.value))}
+                                                className="w-full accent-emerald-500"
+                                            />
+                                        </div>
+                                        {/* Shadow Size */}
+                                        <div>
+                                            <label className="text-xs text-slate-400 mb-1 block">Shadow: {editedPreset.shadow || 0}</label>
+                                            <input
+                                                type="range"
+                                                min="0"
+                                                max="20"
+                                                step="1"
+                                                value={editedPreset.shadow || 0}
+                                                onChange={(e) => handleChange('shadow', parseFloat(e.target.value))}
+                                                className="w-full accent-emerald-500"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Margin Controls */}
+                                    <div className="col-span-2 grid grid-cols-3 gap-4 mt-3">
+                                        <div>
+                                            <label className="text-xs text-slate-400 mb-1 block">Margin V (px)</label>
+                                            <input
+                                                type="number"
+                                                value={editedPreset.margin_v || 50}
+                                                onChange={(e) => handleChange('margin_v', parseInt(e.target.value))}
+                                                className="w-full bg-slate-800 border border-white/10 rounded px-3 py-2 text-sm focus:border-emerald-500 outline-none"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-xs text-slate-400 mb-1 block">Margin L (px)</label>
+                                            <input
+                                                type="number"
+                                                value={editedPreset.margin_l || 10}
+                                                onChange={(e) => handleChange('margin_l', parseInt(e.target.value))}
+                                                className="w-full bg-slate-800 border border-white/10 rounded px-3 py-2 text-sm focus:border-emerald-500 outline-none"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-xs text-slate-400 mb-1 block">Margin R (px)</label>
+                                            <input
+                                                type="number"
+                                                value={editedPreset.margin_r || 10}
+                                                onChange={(e) => handleChange('margin_r', parseInt(e.target.value))}
+                                                className="w-full bg-slate-800 border border-white/10 rounded px-3 py-2 text-sm focus:border-emerald-500 outline-none"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Letter Spacing & Additional Options */}
+                                    <div className="col-span-2 grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-white/5">
+                                        <div>
+                                            <label className="text-xs text-slate-400 mb-1 block">Letter Spacing: {editedPreset.letter_spacing || 0}px</label>
+                                            <input
+                                                type="range"
+                                                min="-5"
+                                                max="20"
+                                                step="1"
+                                                value={editedPreset.letter_spacing || 0}
+                                                onChange={(e) => handleChange('letter_spacing', parseInt(e.target.value))}
+                                                className="w-full accent-emerald-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-xs text-slate-400 mb-1 block">Opacity: {editedPreset.opacity || 100}%</label>
+                                            <input
+                                                type="range"
+                                                min="0"
+                                                max="100"
+                                                step="5"
+                                                value={editedPreset.opacity || 100}
+                                                onChange={(e) => handleChange('opacity', parseInt(e.target.value))}
+                                                className="w-full accent-emerald-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-xs text-slate-400 mb-1 block">Premium</label>
+                                            <button
+                                                onClick={() => handleChange('is_premium', !editedPreset.is_premium)}
+                                                className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border transition ${editedPreset.is_premium
+                                                    ? 'bg-purple-500/20 text-purple-400 border-purple-400/50'
+                                                    : 'bg-slate-800 text-slate-400 border-white/10 hover:border-purple-400/30'
+                                                    }`}
+                                            >
+                                                {editedPreset.is_premium ? '⭐ PRO' : 'Free'}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Effect Type Display */}
+                                    {editedPreset.effect_type && (
+                                        <div className="col-span-2 mt-3 p-3 bg-slate-900/50 rounded-lg border border-white/5">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs text-slate-400">Effect Type:</span>
+                                                <span className="text-sm text-emerald-400 font-mono">{editedPreset.effect_type}</span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </section>
 
@@ -577,8 +784,8 @@ export default function PresetEditor() {
                                             key={pos.key}
                                             onClick={() => handlePositionSelect(pos)}
                                             className={`flex items-center justify-center gap-2 py-3 rounded-lg border text-sm font-semibold transition-all ${editedPreset.alignment === pos.alignment
-                                                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/50 shadow-inner shadow-emerald-500/20'
-                                                    : 'bg-slate-800 border-white/10 text-slate-300 hover:border-emerald-400/40 hover:text-white'
+                                                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/50 shadow-inner shadow-emerald-500/20'
+                                                : 'bg-slate-800 border-white/10 text-slate-300 hover:border-emerald-400/40 hover:text-white'
                                                 }`}
                                         >
                                             {pos.label}
@@ -646,8 +853,8 @@ export default function PresetEditor() {
                                                         key={mode}
                                                         onClick={() => setPreviewMode(mode)}
                                                         className={`px-2 py-1 rounded-full text-xs transition ${previewMode === mode
-                                                                ? "bg-emerald-500 text-white shadow-emerald-500/30 shadow"
-                                                                : "text-slate-300 hover:text-white"
+                                                            ? "bg-emerald-500 text-white shadow-emerald-500/30 shadow"
+                                                            : "text-slate-300 hover:text-white"
                                                             }`}
                                                     >
                                                         {mode === "word" ? "Kelime" : "Grup"}
@@ -668,7 +875,7 @@ export default function PresetEditor() {
                                         className="w-full bg-black rounded-lg overflow-hidden relative border border-white/10"
                                         style={{ aspectRatio: "9 / 16", minHeight: "520px", maxHeight: "78vh" }}
                                     >
-                                        <LivePreview style={editedPreset} background={previewBackground} mode={previewMode} />
+                                        <RealTimePreview preset={editedPreset} />
                                     </div>
                                     <div className="p-3 text-center">
                                         <p className="text-xs text-slate-500">
@@ -741,8 +948,8 @@ export default function PresetEditor() {
                                                     key={file.path}
                                                     onClick={() => setSelectedAasPath(file.path)}
                                                     className={`w-full text-left px-3 py-2 rounded-lg border transition text-sm ${selectedAasPath === file.path
-                                                            ? "border-emerald-400/60 bg-emerald-500/10 text-emerald-200"
-                                                            : "border-white/5 bg-white/5 hover:border-emerald-400/40 text-slate-200"
+                                                        ? "border-emerald-400/60 bg-emerald-500/10 text-emerald-200"
+                                                        : "border-white/5 bg-white/5 hover:border-emerald-400/40 text-slate-200"
                                                         }`}
                                                 >
                                                     <div className="font-medium">{file.name}</div>
@@ -824,8 +1031,8 @@ export default function PresetEditor() {
                                                 key={font}
                                                 onClick={() => handleFontPick(font)}
                                                 className={`w-full text-left p-3 rounded-lg border transition ${editedPreset.font === font
-                                                        ? "border-emerald-400/70 bg-emerald-500/10"
-                                                        : "border-white/10 bg-slate-900/50 hover:border-emerald-400/40"
+                                                    ? "border-emerald-400/70 bg-emerald-500/10"
+                                                    : "border-white/10 bg-slate-900/50 hover:border-emerald-400/40"
                                                     }`}
                                             >
                                                 <div className="text-[11px] text-slate-400 mb-1"> {font}</div>

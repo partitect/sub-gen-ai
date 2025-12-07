@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 
 // License status types
-export type LicenseStatus = 'valid' | 'invalid' | 'expired' | 'disabled' | 'not_activated' | 'unknown';
+export type LicenseStatus = 'valid' | 'invalid' | 'expired' | 'disabled' | 'not_activated' | 'unknown' | 'super_admin';
 
 export interface LicenseInfo {
     isLicensed: boolean;
     status: LicenseStatus;
     isPro: boolean;
+    isSuperAdmin?: boolean;
     activatedAt?: string;
     key?: string;
     offlineMode?: boolean;
@@ -33,6 +34,7 @@ export function useLicense() {
         isLicensed: false,
         status: 'not_activated',
         isPro: false,
+        isSuperAdmin: false,
     });
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -45,11 +47,12 @@ export function useLicense() {
     // Check current license status
     const checkLicenseStatus = useCallback(async () => {
         if (!isElectron()) {
-            // Development mode or web - treat as Pro for testing
+            // Development mode or web - treat as Super Admin for testing
             setLicenseInfo({
                 isLicensed: true,
                 status: 'valid',
                 isPro: true,
+                isSuperAdmin: true,
             });
             setIsLoading(false);
             return;
@@ -149,6 +152,7 @@ export function useLicense() {
         error,
         isPro: licenseInfo.isPro,
         isLicensed: licenseInfo.isLicensed,
+        isSuperAdmin: licenseInfo.isSuperAdmin || false,
         checkLicenseStatus,
         activateLicense,
         deactivateLicense,
