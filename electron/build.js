@@ -107,10 +107,11 @@ async function build() {
   fs.mkdirSync(path.join(BACKEND_COPY, 'logs'), { recursive: true });
   console.log('  Backend kopyalandı');
 
-  // 4. package.json'daki files ayarlarını kontrol et
-  console.log('\n[4/4] Build tamamlandı!');
-  console.log('\nŞimdi electron-builder çalıştırılabilir:');
-  console.log('  npm run build:win');
+  // 4. Check files config in package.json
+  console.log('\n[4/4] Build preparation complete!');
+  console.log('\nNow you can run electron-builder:');
+  console.log('  npm run build:win (Windows)');
+  console.log('  npm run build:mac (macOS)');
 
   console.log('\n' + '='.repeat(60));
 }

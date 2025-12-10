@@ -46,9 +46,21 @@ function getPaths() {
     // If asar is enabled, binaries are in app.asar.unpacked
     // If asar is disabled, they are in app
 
-    const resourcesPath = path.dirname(app.getPath('exe'));
-    const unpackedDir = path.join(resourcesPath, 'resources', 'app.asar.unpacked');
-    const appDir = path.join(resourcesPath, 'resources', 'app');
+    // Path construction differs between Windows and macOS
+    // Windows: exe is in root folder, resources in ./resources/
+    // macOS: exe is in App.app/Contents/MacOS/, resources in App.app/Contents/Resources/
+    let resourcesBasePath;
+    if (process.platform === 'darwin') {
+      // macOS: go up from MacOS to Contents, then into Resources
+      const exeDir = path.dirname(app.getPath('exe')); // .../Contents/MacOS
+      resourcesBasePath = path.join(exeDir, '..', 'Resources'); // .../Contents/Resources
+    } else {
+      // Windows: resources folder is alongside exe
+      resourcesBasePath = path.join(path.dirname(app.getPath('exe')), 'resources');
+    }
+
+    const unpackedDir = path.join(resourcesBasePath, 'app.asar.unpacked');
+    const appDir = path.join(resourcesBasePath, 'app');
 
     // Check if unpacked dir exists (asar enabled)
     const baseDir = fs.existsSync(unpackedDir) ? unpackedDir : appDir;
@@ -59,8 +71,21 @@ function getPaths() {
     // We can just use __dirname which resolves correctly inside asar
     const frontendDir = path.join(__dirname, 'frontend-dist');
 
+    const isWin = process.platform === 'win32';
+    const isMac = process.platform === 'darwin';
+
+    let pythonPath;
+    if (isWin) {
+      pythonPath = path.join(baseDir, 'python-embedded', 'python.exe');
+    } else if (isMac) {
+      // Correct structure based on inspection: python-embedded/python/bin/python3
+      pythonPath = path.join(baseDir, 'python-embedded', 'python', 'bin', 'python3');
+    } else {
+      pythonPath = 'python3'; // Fallback system
+    }
+
     return {
-      pythonExe: path.join(baseDir, 'python-embedded', 'python.exe'),
+      pythonExe: pythonPath,
       backendDir: path.join(baseDir, 'backend'),
       frontendDir: frontendDir,
       frontendUrl: null, // file:// kullan
@@ -317,7 +342,7 @@ ipcMain.handle('export:video', async (event, options) => {
   return new Promise((resolve, reject) => {
     const ffmpegPath = isDev
       ? 'ffmpeg'  // Use system FFmpeg in dev
-      : path.join(paths.ffmpegDir, 'ffmpeg.exe');
+      : path.join(paths.ffmpegDir, process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg');
 
     const args = options.args || [];
 
@@ -416,14 +441,27 @@ async function startBackend() {
     env.APP_ENV = 'desktop';            // Skip production security checks
 
     if (!isDev) {
-      const pythonDir = path.dirname(paths.pythonExe);
-      const sitePackages = path.join(pythonDir, 'Lib', 'site-packages');
-      env.PYTHONPATH = sitePackages;
-      env.PYTHONHOME = pythonDir;
+      const pythonDir = path.dirname(paths.pythonExe); // This is 'bin' dir on mac, root on windows
+
+      if (process.platform === 'darwin') {
+        // macOS: pythonExe is in python-embedded/python/bin/python3
+        // PYTHONHOME should be python-embedded/python (not bin)
+        // site-packages is in python-embedded/python/lib/python3.11/site-packages
+        const pythonHome = path.join(pythonDir, '..'); // go up from bin to python
+        const sitePackages = path.join(pythonHome, 'lib', 'python3.11', 'site-packages');
+        env.PYTHONHOME = pythonHome;
+        env.PYTHONPATH = sitePackages;
+      } else {
+        // Windows
+        const sitePackages = path.join(pythonDir, 'Lib', 'site-packages');
+        env.PYTHONPATH = sitePackages;
+        env.PYTHONHOME = pythonDir;
+      }
 
       // Add FFmpeg to PATH for embedded mode
       if (paths.ffmpegDir && fs.existsSync(paths.ffmpegDir)) {
-        env.PATH = `${paths.ffmpegDir};${env.PATH || ''}`;
+        const separator = process.platform === 'win32' ? ';' : ':';
+        env.PATH = `${paths.ffmpegDir}${separator}${env.PATH || ''}`;
         log.info(`FFmpeg PATH set: ${paths.ffmpegDir}`);
       }
     }

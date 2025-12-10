@@ -14,6 +14,8 @@
     "build": "electron-builder --win",
     "build:nsis": "electron-builder --win nsis",
     "build:portable": "electron-builder --win portable",
+    "build:mac": "electron-builder --mac",
+    "build:mac-dir": "electron-builder --mac --dir",
     "pack": "electron-builder --dir"
   },
   "build": {
@@ -32,6 +34,7 @@
     },
     "files": [
       "main.js",
+      "license-manager.js",
       "preload.js",
       "assets/**/*",
       "python-embedded/**/*",
@@ -69,6 +72,15 @@
       "shortcutName": "Subcio",
       "installerSidebar": "assets/installerSidebar.png",
       "installerHeader": "assets/installerHeader.png"
+    },
+    "mac": {
+      "target": "dmg",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "Please allow access to the microphone to use audio features.",
+        "NSCameraUsageDescription": "Please allow access to the camera to use video features."
+      }
     },
     "portable": {
       "artifactName": "${productName}-Portable-${version}.${ext}"
