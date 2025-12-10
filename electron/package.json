@@ -102,7 +102,6 @@
     },
     "dmg": {
       "background": "assets/dmg-background.png",
-      "icon": "assets/icon.icns",
       "iconSize": 100,
       "window": {
         "width": 540,

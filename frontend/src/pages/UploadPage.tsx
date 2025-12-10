@@ -60,15 +60,7 @@ import { getLottieUrl } from "../utils/assetPath";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
-const WHISPER_MODELS = [
-  { id: "tiny", name: "Tiny", speed: "Fastest", accuracy: "Basic", recommended: false },
-  { id: "base", name: "Base", speed: "Fast", accuracy: "Good", recommended: false },
-  { id: "small", name: "Small", speed: "Medium", accuracy: "Better", recommended: false },
-  { id: "medium", name: "Medium", speed: "Balanced", accuracy: "Great", recommended: true },
-  { id: "large-v2", name: "Large V2", speed: "Slow", accuracy: "Excellent", recommended: false },
-  { id: "large-v3", name: "Large V3", speed: "Slow", accuracy: "Best", recommended: false },
-  { id: "turbo", name: "Turbo", speed: "Fast", accuracy: "Great", recommended: false },
-];
+// Whisper model is bundled (large-v3), no selection needed
 
 const SUPPORTED_FORMATS = [
   { ext: "MP4", icon: Film, color: "#6366f1" },
@@ -98,7 +90,6 @@ export default function UploadPage() {
   // File upload state
   const [file, setFile] = useState<File | null>(null);
   const [language, setLanguage] = useState<string>("");
-  const [model, setModel] = useState<string>("medium");
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [dragOver, setDragOver] = useState(false);
@@ -195,7 +186,7 @@ export default function UploadPage() {
 
     const form = new FormData();
     form.append("file", file);
-    form.append("model_name", model);
+    // Model is bundled (large-v3), no need to send
     if (language) form.append("language", language);
 
     try {
@@ -435,6 +426,13 @@ export default function UploadPage() {
                 </CardContent>
               </Card>
 
+
+            </Stack>
+          </Grid>
+
+          {/* Sidebar */}
+          <Grid item xs={12} lg={4}>
+            <Stack spacing={3}>
               {/* Settings Card */}
               <Card
                 sx={{
@@ -449,43 +447,8 @@ export default function UploadPage() {
                   </Typography>
 
                   <Grid container spacing={3}>
-                    {/* Model Selection */}
-                    <Grid item xs={12} md={6}>
-                      <Stack spacing={1.5}>
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <Zap size={16} color={theme.palette.primary.main} />
-                          <Typography variant="body2" fontWeight={600}>
-                            {t('upload.settings.aiModel')}
-                          </Typography>
-                        </Stack>
-                        <TextField
-                          select
-                          fullWidth
-                          size="small"
-                          value={model}
-                          onChange={(e) => setModel(e.target.value)}
-                        >
-                          {WHISPER_MODELS.map((m) => (
-                            <MenuItem key={m.id} value={m.id}>
-                              <Stack direction="row" alignItems="center" justifyContent="space-between" width="100%">
-                                <Typography>{m.name}</Typography>
-                                <Stack direction="row" spacing={1}>
-                                  {m.recommended && (
-                                    <Chip label={t('upload.settings.recommended')} size="small" color="primary" sx={{ height: 20, fontSize: "0.65rem" }} />
-                                  )}
-                                  <Typography variant="caption" color="text.secondary">
-                                    {m.accuracy}
-                                  </Typography>
-                                </Stack>
-                              </Stack>
-                            </MenuItem>
-                          ))}
-                        </TextField>
-                      </Stack>
-                    </Grid>
-
-                    {/* Language Selection */}
-                    <Grid item xs={12} md={6}>
+                    {/* Language Selection - Full Width */}
+                    <Grid item xs={12}>
                       <Stack spacing={1.5}>
                         <Stack direction="row" spacing={1} alignItems="center">
                           <Languages size={16} color={theme.palette.secondary.main} />
@@ -579,183 +542,6 @@ export default function UploadPage() {
                       {loading ? t('upload.buttons.processing') : t('upload.buttons.startTranscription')}
                     </Button>
                   </Box>
-                </CardContent>
-              </Card>
-            </Stack>
-          </Grid>
-
-          {/* Sidebar */}
-          <Grid item xs={12} lg={4}>
-            <Stack spacing={3}>
-              {/* Usage Card Removed */}
-
-              {/* Recent Projects Card - Real Data */}
-              <Card
-                sx={{
-                  borderRadius: 3,
-                  bgcolor: alpha(theme.palette.background.paper, 0.6),
-                  backdropFilter: "blur(20px)",
-                }}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-                    <Stack direction="row" spacing={1} alignItems="center">
-                      <Calendar size={18} color={theme.palette.secondary.main} />
-                      <Typography variant="subtitle1" fontWeight={700}>
-                        {t('upload.recentUploads.title')}
-                      </Typography>
-                    </Stack>
-                    <Tooltip title={t('common.refresh')}>
-                      <IconButton size="small" onClick={fetchRecentProjects} disabled={loadingProjects}>
-                        <RefreshCw size={16} className={loadingProjects ? "animate-spin" : ""} />
-                      </IconButton>
-                    </Tooltip>
-                  </Stack>
-
-                  {loadingProjects ? (
-                    <Stack spacing={2}>
-                      {[1, 2, 3].map((i) => (
-                        <Stack key={i} direction="row" spacing={2} alignItems="center">
-                          <Skeleton variant="circular" width={40} height={40} />
-                          <Box sx={{ flex: 1 }}>
-                            <Skeleton width="80%" height={20} />
-                            <Skeleton width="50%" height={16} />
-                          </Box>
-                        </Stack>
-                      ))}
-                    </Stack>
-                  ) : recentProjects.length === 0 ? (
-                    <Box
-                      sx={{
-                        py: 4,
-                        textAlign: "center",
-                        color: "text.secondary",
-                      }}
-                    >
-                      <FileVideo size={40} style={{ opacity: 0.3, marginBottom: 8 }} />
-                      <Typography variant="body2">
-                        {t('upload.recentUploads.noProjects')}
-                      </Typography>
-                    </Box>
-                  ) : (
-                    <Stack spacing={2}>
-                      {recentProjects.map((project, index) => (
-                        <Box key={project.id}>
-                          <Stack
-                            direction="row"
-                            spacing={2}
-                            alignItems="center"
-                            component={RouterLink}
-                            to={`/editor/${project.id}`}
-                            sx={{
-                              textDecoration: "none",
-                              color: "inherit",
-                              p: 1,
-                              mx: -1,
-                              borderRadius: 2,
-                              transition: "background 0.2s",
-                              "&:hover": {
-                                bgcolor: alpha(theme.palette.primary.main, 0.05),
-                              },
-                            }}
-                          >
-                            <Avatar
-                              sx={{
-                                width: 40,
-                                height: 40,
-                                bgcolor: alpha(theme.palette.primary.main, 0.1),
-                                color: "primary.main",
-                              }}
-                            >
-                              {project.thumb_url ? (
-                                <Box
-                                  component="img"
-                                  src={project.thumb_url}
-                                  sx={{ width: "100%", height: "100%", objectFit: "cover" }}
-                                />
-                              ) : (
-                                <PlayCircle size={18} />
-                              )}
-                            </Avatar>
-                            <Box sx={{ flex: 1, minWidth: 0 }}>
-                              <Typography
-                                variant="body2"
-                                fontWeight={600}
-                                noWrap
-                                sx={{ maxWidth: 180 }}
-                              >
-                                {project.name || t('upload.recentUploads.untitled')}
-                              </Typography>
-                              <Stack direction="row" spacing={1} alignItems="center">
-                                <Clock size={12} />
-                                <Typography variant="caption" color="text.secondary">
-                                  {/* Duration removed */}
-                                  N/A
-                                </Typography>
-                                <Typography variant="caption" color="text.disabled">
-                                  •
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  {formatDate(project.created_at)}
-                                </Typography>
-                              </Stack>
-                            </Box>
-                            <Chip
-                              icon={<CheckCircle size={12} />}
-                              label={t('upload.recentUploads.done')}
-                              size="small"
-                              color="success"
-                              sx={{ height: 24, fontSize: "0.65rem" }}
-                            />
-                          </Stack>
-                          {index < recentProjects.length - 1 && (
-                            <Divider sx={{ mt: 2 }} />
-                          )}
-                        </Box>
-                      ))}
-                    </Stack>
-                  )}
-
-                  {recentProjects.length > 0 && (
-                    <Button
-                      component={RouterLink}
-                      to="/dashboard"
-                      size="small"
-                      fullWidth
-                      endIcon={<ArrowRight size={14} />}
-                      sx={{ mt: 2 }}
-                    >
-                      {t('upload.recentUploads.viewAll')}
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Tips Card */}
-              <Card
-                sx={{
-                  borderRadius: 3,
-                  background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.secondary.main, 0.05)} 100%)`,
-                }}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
-                    <Sparkles size={18} color={theme.palette.primary.main} />
-                    <Typography variant="subtitle1" fontWeight={700}>
-                      {t('upload.tips.title')}
-                    </Typography>
-                  </Stack>
-                  <Stack spacing={1.5}>
-                    <Typography variant="body2" color="text.secondary">
-                      • {t('upload.tips.tip1')}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      • {t('upload.tips.tip2')}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      • {t('upload.tips.tip3')}
-                    </Typography>
-                  </Stack>
                 </CardContent>
               </Card>
             </Stack>

@@ -75,7 +75,7 @@ def ms_to_ass_timestamp(ms: int) -> str:
 # -----------------------------------------------------------------------------
 # Whisper model bootstrap (cached globally to avoid repeated loads)
 # -----------------------------------------------------------------------------
-DEFAULT_MODEL = os.getenv("WHISPER_MODEL", "small")  # Use 'small' for lower memory usage
+DEFAULT_MODEL = "large-v3"  # Bundled with app for instant first use
 DEVICE = "cuda" if shutil.which("nvidia-smi") else "cpu"
 MODEL_CACHE: dict[str, Any] = {}  # WhisperModel instances, lazy loaded
 
@@ -410,11 +410,21 @@ for _pid, _pstyle in PRESET_STYLE_MAP.items():
 
 
 def get_model(model_name: str) -> Any:
-    """Lazy load WhisperModel to avoid numpy compatibility issues at startup."""
+    """Lazy load WhisperModel, using downloaded model if available."""
     from faster_whisper import WhisperModel
     if model_name not in MODEL_CACHE:
+        # Check for downloaded model in user data directory
+        downloaded_model_path = BASE_DATA_DIR / "models" / "whisper-large-v3"
+        if downloaded_model_path.exists() and (downloaded_model_path / "model.bin").exists():
+            logger.info(f"Using downloaded Whisper model from: {downloaded_model_path}")
+            model_path = str(downloaded_model_path)
+        else:
+            # Fall back to downloading from HuggingFace (will happen on first use if not pre-downloaded)
+            logger.info(f"Downloaded model not found, using HuggingFace: {model_name}")
+            model_path = model_name
+        
         MODEL_CACHE[model_name] = WhisperModel(
-            model_name,
+            model_path,
             device=DEVICE,
             compute_type="float16" if DEVICE == "cuda" else "int8",
         )
@@ -912,6 +922,135 @@ async def health_check():
         "version": "1.0.0",
         "service": "subcio-desktop"
     }
+
+# Model download directory (user data dir, not app dir)
+MODEL_DIR = BASE_DATA_DIR / "models" / "whisper-large-v3"
+MODEL_DIR.parent.mkdir(parents=True, exist_ok=True)
+
+@app.get("/api/model/status")
+async def model_status():
+    """Check if Whisper model is downloaded and ready."""
+    model_file = MODEL_DIR / "model.bin"
+    if model_file.exists():
+        size_gb = model_file.stat().st_size / (1024**3)
+        return {
+            "ready": True,
+            "model": "large-v3",
+            "size_gb": round(size_gb, 2),
+            "path": str(MODEL_DIR)
+        }
+    return {
+        "ready": False,
+        "model": "large-v3",
+        "message": "Model not downloaded yet"
+    }
+
+@app.post("/api/model/download")
+async def download_model():
+    """Download Whisper model with progress updates via SSE."""
+    from starlette.responses import StreamingResponse
+    import json
+    import threading
+    import asyncio
+    import time
+    
+    # Track download state
+    download_state = {"status": "starting", "progress": 0, "message": "Starting...", "done": False, "speed": 0}
+    
+    def get_folder_size(path):
+        """Get total size of all files in folder."""
+        total = 0
+        if path.exists():
+            for f in path.rglob("*"):
+                if f.is_file():
+                    try:
+                        total += f.stat().st_size
+                    except:
+                        pass
+        return total
+    
+    def do_download():
+        """Run download in background thread."""
+        try:
+            from huggingface_hub import snapshot_download
+            
+            download_state["status"] = "downloading"
+            download_state["message"] = "Connecting to HuggingFace..."
+            download_state["progress"] = 5
+            
+            MODEL_DIR.mkdir(parents=True, exist_ok=True)
+            
+            snapshot_download(
+                "Systran/faster-whisper-large-v3",
+                local_dir=str(MODEL_DIR),
+                local_dir_use_symlinks=False
+            )
+            
+            download_state["status"] = "complete"
+            download_state["progress"] = 100
+            download_state["message"] = "Download complete!"
+            
+        except Exception as e:
+            download_state["status"] = "error"
+            download_state["message"] = str(e)
+            logger.error(f"Download failed: {e}")
+        finally:
+            download_state["done"] = True
+    
+    async def generate():
+        # Check if already downloaded
+        model_file = MODEL_DIR / "model.bin"
+        if model_file.exists():
+            yield f"data: {json.dumps({'status': 'complete', 'progress': 100, 'message': 'Model ready!'})}\n\n"
+            return
+        
+        yield f"data: {json.dumps({'status': 'starting', 'progress': 0, 'message': 'Preparing download...'})}\n\n"
+        
+        # Start download in background
+        thread = threading.Thread(target=do_download)
+        thread.start()
+        
+        # Total expected size ~3.1GB (all files combined)
+        expected_size = 3_100_000_000
+        last_size = 0
+        last_time = time.time()
+        pulse = 0
+        
+        while not download_state["done"]:
+            await asyncio.sleep(0.5)  # Update more frequently
+            
+            current_size = get_folder_size(MODEL_DIR)
+            current_time = time.time()
+            
+            # Calculate speed
+            time_diff = current_time - last_time
+            if time_diff > 0:
+                speed = (current_size - last_size) / time_diff / (1024 * 1024)  # MB/s
+                download_state["speed"] = max(0, speed)
+            
+            last_size = current_size
+            last_time = current_time
+            
+            # Calculate progress (5-95%)
+            if current_size > 0:
+                progress = max(5, min(95, int((current_size / expected_size) * 100)))
+                download_state["progress"] = progress
+                
+                size_mb = current_size / (1024 * 1024)
+                speed_str = f"{download_state['speed']:.1f} MB/s" if download_state['speed'] > 0.1 else "calculating..."
+                download_state["message"] = f"{size_mb:.0f} MB / 3000 MB • {speed_str}"
+            else:
+                # Pulse animation when waiting
+                pulse = (pulse + 1) % 4
+                dots = "." * (pulse + 1)
+                download_state["message"] = f"Connecting{dots}"
+            
+            yield f"data: {json.dumps({'status': download_state['status'], 'progress': download_state['progress'], 'message': download_state['message'], 'speed': download_state['speed']})}\n\n"
+        
+        # Final status
+        yield f"data: {json.dumps({'status': download_state['status'], 'progress': download_state['progress'], 'message': download_state['message']})}\n\n"
+    
+    return StreamingResponse(generate(), media_type="text/event-stream")
 
 # Initialize database on startup
 @app.on_event("startup")
