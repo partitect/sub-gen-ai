@@ -15,8 +15,17 @@
     "build:nsis": "electron-builder --win nsis",
     "build:portable": "electron-builder --win portable",
     "build:mac": "electron-builder --mac",
+    "build:mac-x64": "electron-builder --mac --x64",
+    "build:mac-arm64": "electron-builder --mac --arm64",
+    "build:mac-universal": "electron-builder --mac --x64 && electron-builder --mac --arm64",
     "build:mac-dir": "electron-builder --mac --dir",
-    "pack": "electron-builder --dir"
+    "build:all": "node scripts/build-all.js --all",
+    "build:all-mac": "node scripts/build-all.js --mac",
+    "pack": "electron-builder --dir",
+    "release:patch": "npm version patch && git push && git push --tags",
+    "release:minor": "npm version minor && git push && git push --tags",
+    "release:major": "npm version major && git push && git push --tags",
+    "postversion": "echo 'Version bumped to' $(node -p \"require('./package.json').version\")"
   },
   "build": {
     "appId": "com.subcio.app",
@@ -74,13 +83,43 @@
       "installerHeader": "assets/installerHeader.png"
     },
     "mac": {
-      "target": "dmg",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
       "extendInfo": {
         "NSMicrophoneUsageDescription": "Please allow access to the microphone to use audio features.",
         "NSCameraUsageDescription": "Please allow access to the camera to use video features."
       }
+    },
+    "dmg": {
+      "background": "assets/dmg-background.png",
+      "icon": "assets/icon.icns",
+      "iconSize": 100,
+      "window": {
+        "width": 540,
+        "height": 380
+      },
+      "contents": [
+        {
+          "x": 140,
+          "y": 180
+        },
+        {
+          "x": 400,
+          "y": 180,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
     },
     "portable": {
       "artifactName": "${productName}-Portable-${version}.${ext}"

@@ -22,7 +22,12 @@ const GET_PIP_URL = 'https://bootstrap.pypa.io/get-pip.py';
 
 // FFmpeg
 const FFMPEG_URL_WIN = 'https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip';
-const FFMPEG_URL_MAC = 'https://evermeet.cx/ffmpeg/getrelease/zip'; // Gets latest stable ffmpeg
+// For macOS, we need to handle architecture (evermeet.cx is x86_64 only)
+// OSXExperts.NET provides arm64 builds
+const FFMPEG_URL_MAC_X64 = 'https://evermeet.cx/ffmpeg/getrelease/zip';
+const FFMPEG_URL_MAC_ARM64 = 'https://www.osxexperts.net/ffmpeg80arm.zip'; // FFmpeg 8.0 for Apple Silicon
+const FFPROBE_URL_MAC_X64 = 'https://evermeet.cx/ffprobe/getrelease/zip';
+const FFPROBE_URL_MAC_ARM64 = 'https://www.osxexperts.net/ffprobe80arm.zip'; // FFprobe 8.0 for Apple Silicon
 
 const ELECTRON_DIR = path.resolve(__dirname, '..');
 const PYTHON_DIR = path.join(ELECTRON_DIR, 'python-embedded');
@@ -258,9 +263,18 @@ async function prepareFFmpeg() {
   fs.mkdirSync(FFMPEG_DIR, { recursive: true });
 
   const zipPath = path.join(FFMPEG_DIR, 'ffmpeg.zip');
-  const url = IS_MAC ? FFMPEG_URL_MAC : FFMPEG_URL_WIN;
 
-  await download(url, zipPath);
+  let ffmpegUrl, ffprobeUrl;
+  if (IS_MAC) {
+    const isArm64 = process.arch === 'arm64';
+    ffmpegUrl = isArm64 ? FFMPEG_URL_MAC_ARM64 : FFMPEG_URL_MAC_X64;
+    ffprobeUrl = isArm64 ? FFPROBE_URL_MAC_ARM64 : FFPROBE_URL_MAC_X64;
+    console.log(`Using ${isArm64 ? 'ARM64' : 'x64'} FFmpeg builds for macOS`);
+  } else {
+    ffmpegUrl = FFMPEG_URL_WIN;
+  }
+
+  await download(ffmpegUrl, zipPath);
 
   // Extract
   if (IS_MAC) {
@@ -268,18 +282,60 @@ async function prepareFFmpeg() {
     fs.mkdirSync(tempDir);
     execSync(`unzip -o "${zipPath}" -d "${tempDir}"`, { stdio: 'inherit' });
 
-    if (fs.existsSync(path.join(tempDir, 'ffmpeg'))) {
-      fs.copyFileSync(path.join(tempDir, 'ffmpeg'), path.join(FFMPEG_DIR, 'ffmpeg'));
+    // Find ffmpeg binary (may be at root or in a subfolder)
+    const tempContents = fs.readdirSync(tempDir);
+    let ffmpegSrc = path.join(tempDir, 'ffmpeg');
+    if (!fs.existsSync(ffmpegSrc)) {
+      // Check if there's a subfolder
+      for (const item of tempContents) {
+        const possiblePath = path.join(tempDir, item, 'ffmpeg');
+        if (fs.existsSync(possiblePath)) {
+          ffmpegSrc = possiblePath;
+          break;
+        }
+        // Also check if the item itself is ffmpeg (some zips have just the binary)
+        if (item === 'ffmpeg' || item.startsWith('ffmpeg')) {
+          const itemPath = path.join(tempDir, item);
+          if (fs.statSync(itemPath).isFile()) {
+            ffmpegSrc = itemPath;
+            break;
+          }
+        }
+      }
+    }
+
+    if (fs.existsSync(ffmpegSrc)) {
+      fs.copyFileSync(ffmpegSrc, path.join(FFMPEG_DIR, 'ffmpeg'));
       execSync(`chmod +x "${path.join(FFMPEG_DIR, 'ffmpeg')}"`);
+      console.log('FFmpeg installed successfully');
+    } else {
+      console.warn('Could not find ffmpeg binary in archive');
     }
 
     console.log('Downloading FFprobe for Mac...');
     const probeZip = path.join(FFMPEG_DIR, 'ffprobe.zip');
-    await download('https://evermeet.cx/ffprobe/getrelease/zip', probeZip);
+    await download(ffprobeUrl, probeZip);
     execSync(`unzip -o "${probeZip}" -d "${tempDir}"`, { stdio: 'inherit' });
-    if (fs.existsSync(path.join(tempDir, 'ffprobe'))) {
-      fs.copyFileSync(path.join(tempDir, 'ffprobe'), path.join(FFMPEG_DIR, 'ffprobe'));
+
+    // Find ffprobe binary
+    let ffprobeSrc = path.join(tempDir, 'ffprobe');
+    if (!fs.existsSync(ffprobeSrc)) {
+      const probeContents = fs.readdirSync(tempDir);
+      for (const item of probeContents) {
+        if (item === 'ffprobe' || item.startsWith('ffprobe')) {
+          const itemPath = path.join(tempDir, item);
+          if (fs.statSync(itemPath).isFile()) {
+            ffprobeSrc = itemPath;
+            break;
+          }
+        }
+      }
+    }
+
+    if (fs.existsSync(ffprobeSrc)) {
+      fs.copyFileSync(ffprobeSrc, path.join(FFMPEG_DIR, 'ffprobe'));
       execSync(`chmod +x "${path.join(FFMPEG_DIR, 'ffprobe')}"`);
+      console.log('FFprobe installed successfully');
     }
     fs.unlinkSync(probeZip);
 
