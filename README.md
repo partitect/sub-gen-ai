@@ -33,12 +33,9 @@ Transform your videos with beautifully styled, animated subtitles in seconds. Su
 - Project management
 - Cloud storage
 
-### 🔐 Authentication & Payments
-- Email/password authentication
-- OAuth (Google, GitHub)
-- Stripe integration
-- Subscription management
-- Usage tracking
+### 🔐 Desktop Licensing
+- Offline license validation
+- Machine-based activation
 
 ---
 
@@ -93,31 +90,29 @@ Transform your videos with beautifully styled, animated subtitles in seconds. Su
 
 ---
 
-## 📦 Production Deployment
+## 📦 Desktop Application Build
 
-See [DEPLOYMENT_STEPS.md](DEPLOYMENT_STEPS.md) for detailed production deployment guide.
+This is an Electron desktop application. To build:
 
-**Quick Deploy:**
-
-### Backend (Railway)
+### macOS
 ```bash
-# Connect GitHub repo to Railway
-# Add PostgreSQL database
-# Set environment variables from .env.production.example
-# Deploy automatically
+cd electron
+npm install
+npm run build:all-mac   # Builds Intel + Apple Silicon DMGs
 ```
 
-### Frontend (Netlify)
+### Windows
 ```bash
-# Connect GitHub repo to Netlify
-# Configure build: npm run build
-# Set environment variables
-# Deploy automatically
+cd electron
+npm install
+npm run build   # Builds NSIS installer + Portable
 ```
 
-**Environment Variables:**
-- Backend: See [.env.production.example](.env.production.example)
-- Frontend: See [frontend/.env.production.example](frontend/.env.production.example)
+### Release New Version
+```bash
+cd electron
+npm run release:patch   # 1.0.0 → 1.0.1 (auto builds via GitHub Actions)
+```
 
 ---
 

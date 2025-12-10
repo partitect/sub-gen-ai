@@ -618,7 +618,7 @@ def run_ffmpeg_burn(
         "-c:v", encoder,
     ]
     
-    # Add codec-specific options (memory-optimized for Railway free tier)
+    # Add codec-specific options (optimized for desktop)
     if codec == "h264":
         cmd.extend([
             "-preset", "medium",  # Balance speed/quality
