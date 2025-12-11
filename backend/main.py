@@ -411,23 +411,33 @@ for _pid, _pstyle in PRESET_STYLE_MAP.items():
 
 def get_model(model_name: str) -> Any:
     """Lazy load WhisperModel, using downloaded model if available."""
+    import time as _load_time
     from faster_whisper import WhisperModel
+    
     if model_name not in MODEL_CACHE:
         # Check for downloaded model in user data directory
         downloaded_model_path = BASE_DATA_DIR / "models" / "whisper-large-v3"
         if downloaded_model_path.exists() and (downloaded_model_path / "model.bin").exists():
-            logger.info(f"Using downloaded Whisper model from: {downloaded_model_path}")
+            logger.info(f"Loading Whisper model from local cache: {downloaded_model_path}")
+            logger.info(f"This may take 30-60 seconds on first use (loading ~3GB model into memory)...")
             model_path = str(downloaded_model_path)
         else:
             # Fall back to downloading from HuggingFace (will happen on first use if not pre-downloaded)
-            logger.info(f"Downloaded model not found, using HuggingFace: {model_name}")
+            logger.warning(f"Local model not found at {downloaded_model_path}, downloading from HuggingFace: {model_name}")
+            logger.warning(f"This will download ~3GB and may take several minutes...")
             model_path = model_name
         
+        start_time = _load_time.time()
         MODEL_CACHE[model_name] = WhisperModel(
             model_path,
             device=DEVICE,
             compute_type="float16" if DEVICE == "cuda" else "int8",
         )
+        load_duration = _load_time.time() - start_time
+        logger.info(f"Whisper model loaded successfully in {load_duration:.1f} seconds (device: {DEVICE})")
+    else:
+        logger.debug(f"Using cached Whisper model: {model_name}")
+    
     return MODEL_CACHE[model_name]
 
 
@@ -1059,6 +1069,24 @@ async def startup_event():
     logger.info("Subcio API started")
     logger.info("Security middleware active")
     logger.info("Request logging enabled")
+    
+    # Pre-load Whisper model in background if already downloaded
+    # This speeds up the first transcription request
+    model_file = MODEL_DIR / "model.bin"
+    if model_file.exists():
+        logger.info("Pre-loading Whisper model in background...")
+        import threading
+        def preload_model():
+            try:
+                get_model(DEFAULT_MODEL)
+                logger.info("Whisper model pre-loaded and ready for transcription")
+            except Exception as e:
+                logger.warning(f"Failed to pre-load model: {e}")
+        
+        # Start preloading in background thread
+        threading.Thread(target=preload_model, daemon=True).start()
+    else:
+        logger.info("Whisper model not yet downloaded, skipping pre-load")
 
 # Request logging middleware
 from starlette.middleware.base import BaseHTTPMiddleware
